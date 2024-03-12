@@ -1,5 +1,4 @@
 #!/bin/bash
-
 PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
 # colors
@@ -12,7 +11,7 @@ tweaksetting_dir=./插件配置备份
 sources_dir=./源地址备份
 
 mkd(){
-    if [ ! -e $1 ]; then
+	if [ ! -e $1 ]; then
         mkdir $1;
     fi;
 }
@@ -292,5 +291,4 @@ else
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
 	echo
 	exit
-fi
-                                                                  
+fi                                                                
