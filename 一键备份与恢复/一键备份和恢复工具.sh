@@ -32,7 +32,7 @@ tweak2backup(){
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
-  		name=$(dpkg-deb -f "$(dpkg-query -L "$pkg" | grep -m1 "/DEBIAN/" | sed 's/\/DEBIAN.*$//')" Name)
+  		name=$(dpkg-query -s "$pkg" | grep Package | awk '{print $2}')
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -98,8 +98,8 @@ tweak2backup(){
 
 		echo
 		echo -e "${nco} 已成功备份"$num"个插件${nco}"
-		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" "$bak_dir"/"$name"_"$ver"_"$arc".deb
-		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc"
+		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
 		echo
 	done
 
