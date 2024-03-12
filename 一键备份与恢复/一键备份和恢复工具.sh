@@ -124,7 +124,6 @@ setting2backup(){
 backup(){
 	mkd $bak_dir
 	mkd $tweaksetting_dir
-	mkd $others_dir
 	mkd $sources_dir
 	
 	echo
