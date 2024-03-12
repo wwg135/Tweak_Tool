@@ -32,7 +32,7 @@ tweak2backup(){
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
-  		name=$(dpkg-query -s "$pkg" | grep Package | awk '{print $2}' | awk -F':' '{print $2}')
+  		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
