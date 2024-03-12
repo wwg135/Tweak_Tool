@@ -210,7 +210,7 @@ backup(){
 		new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 		mkdir $new_dir
  		mv ./* "$new_dir/"
-   		"${red} 新备份文件在/var/mobile/"
+   		echo -e "${red}新备份文件：$new_dir${red}"
 		echo
 	else
 		clear
