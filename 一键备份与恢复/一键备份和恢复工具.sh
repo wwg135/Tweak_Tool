@@ -1,6 +1,11 @@
 #!/bin/bash
 PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
+# 创建备份目录并进入
+dir=/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')
+mkdir $dir
+cd $dir
+
 # colors
 red="\033[38;5;196m"
 nco="\033[0m" #no color
