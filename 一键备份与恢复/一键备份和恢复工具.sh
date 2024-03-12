@@ -1,5 +1,4 @@
 #!/bin/bash
-PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
 # colors
 red="\033[38;5;196m"
@@ -11,19 +10,28 @@ tweaksetting_dir=./插件配置备份
 sources_dir=./源地址备份
 
 mkd(){
-	if [ ! -e $1 ]; then
-        mkdir $1;
-    fi;
+	if [ ! -d $1 ]; then
+        	mkdir -p $1;
+    	fi;
 }
 
 if [[ $EUID -ne 0 ]]; then
 	echo
 	echo -e ${red}" 权限不足！"
 	echo
-	echo -e ${red}" 请先执行"权限修改"文件"
+	echo -e ${red}" 如使用Terminal，请用sudo TweakTool命令执行"
 	echo
 	exit
 fi
+
+checkPremissions(){
+    	if [ -e $1 ]; then
+		f_p=`stat -c %a $1`
+		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
+			chmod 755 $1
+		fi
+    	fi
+}
 	
 tweak2backup(){
 	debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf ./tweak_exclude_list | cut -f1 | awk '{print $1}')"
@@ -45,31 +53,53 @@ tweak2backup(){
 		fi
 		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
 		dpkg-query -s "$pkg" | grep -v Status >> "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
-		if [ -d /var/jb/Library/dpkg/info ];then
-			cp /var/jb/Library/dpkg/info/"$pkg".postinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".preinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".postrm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".prerm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".extrainst_ "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".extrainst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".control-e "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".triggers "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".conffiles "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".ldid "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".crash_reporter "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
+  		if [ -d /var/jb/Library/dpkg/info ];then
+			postinst=/var/jb/Library/dpkg/info/"$pkg".postinst
+			preinst=/var/jb/Library/dpkg/info/"$pkg".preinst
+			postrm=/var/jb/Library/dpkg/info/"$pkg".postrm
+			prerm=/var/jb/Library/dpkg/info/"$pkg".prerm
+			extrainst_=/var/jb/Library/dpkg/info/"$pkg".extrainst_
+			extrainst=/var/jb/Library/dpkg/info/"$pkg".extrainst
+			control=/var/jb/Library/dpkg/info/"$pkg".control-e
+			triggers=/var/jb/Library/dpkg/info/"$pkg".triggers
+			conffiles=/var/jb/Library/dpkg/info/"$pkg".conffiles
+			ldid=/var/jb/Library/dpkg/info/"$pkg".ldid
+			crash_reporter=/var/jb/Library/dpkg/info/"$pkg".crash_reporter
 		else
-			cp /var/lib/dpkg/info/"$pkg".postinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".preinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".postrm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".prerm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".extrainst_ "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".extrainst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".control-e "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".triggers "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".conffiles "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".ldid "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".crash_reporter "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
+			postinst=/var/lib/dpkg/info/"$pkg".postinst
+			preinst=/var/lib/dpkg/info/"$pkg".preinst
+			postrm=/var/lib/dpkg/info/"$pkg".postrm
+			prerm=/var/lib/dpkg/info/"$pkg".prerm
+			extrainst_=/var/lib/dpkg/info/"$pkg".extrainst_
+			extrainst=/var/lib/dpkg/info/"$pkg".extrainst
+			control=/var/lib/dpkg/info/"$pkg".control-e
+			triggers=/var/lib/dpkg/info/"$pkg".triggers
+			conffiles=/var/lib/dpkg/info/"$pkg".conffiles
+			ldid=/var/lib/dpkg/info/"$pkg".ldid
+			crash_reporter=/var/lib/dpkg/info/"$pkg".crash_reporter
 		fi
+		checkPremissions "$postinst"
+		checkPremissions "$preinst"
+		checkPremissions "$postrm"
+		checkPremissions "$prerm"
+		checkPremissions "$extrainst_"
+		checkPremissions "$extrainst"
+		checkPremissions "$control"
+		checkPremissions "$triggers"
+		checkPremissions "$conffiles"
+		checkPremissions "$ldid"
+		checkPremissions "$crash_reporter"
+		cp "$postinst" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
+		cp "$preinst" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
+		cp "$postrm" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
+		cp "$prerm" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
+		cp "$extrainst_" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
+		cp "$extrainst" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
+		cp "$control" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
+		cp "$triggers" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
+		cp "$conffiles" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
+		cp "$ldid" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
+		cp "$crash_reporter" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
 
 		SAVEIFS=$IFS
 		IFS=$'\n'
