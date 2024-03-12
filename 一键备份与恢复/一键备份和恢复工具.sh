@@ -20,7 +20,7 @@ if [[ $EUID -ne 0 ]]; then
 	echo
 	echo -e ${red}" 权限不足！"
 	echo
-	echo -e ${red}" 请先执行"1.权限修改"文件"
+	echo -e ${red}" 请先执行"权限修改"文件"
 	echo
 	exit
 fi
