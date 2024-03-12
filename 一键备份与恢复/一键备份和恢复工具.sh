@@ -1,4 +1,5 @@
 #!/bin/bash
+PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
 # colors
 red="\033[38;5;196m"
