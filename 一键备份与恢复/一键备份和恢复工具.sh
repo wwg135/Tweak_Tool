@@ -27,7 +27,7 @@ fi
 	
 tweak2backup(){
 	deps="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf ./tweak_exclude_list | cut -f1 | awk '{print $1}')"
-   for pkg in $deps; do
+   	for pkg in $deps; do
 		num=$(($num+1))
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
