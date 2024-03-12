@@ -210,8 +210,8 @@ backup(){
 		new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 		mkdir $new_dir
  		mv ./* "$new_dir/"
-   		"${red} 新备份文件夹在$new_dir${nco}"
-  
+   		"${red} 新备份文件在/var/mobile/"
+		echo
 	else
 		clear
 		yes '' | sed 2q
@@ -270,7 +270,7 @@ recover(){
 		echo
 		echo -e "${nco} 开始恢复插件设置${nco}"
 		cp -a ./"$tweaksetting_dir"/* /var/jb/User/
-		cp -a ./"$sources_dir"/sileo.sources /var/jb/etc/apt/sources.list.d/
+		cp -a ./"$sources_dir"/* /var/jb/etc/apt/
 		chown mobile:staff /var/jb/User/Library/Preferences
 		echo -e "${nco} 插件设置恢复成功${nco}"
 
