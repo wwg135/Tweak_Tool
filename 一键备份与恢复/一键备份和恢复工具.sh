@@ -34,7 +34,7 @@ checkPremissions(){
 }
 	
 tweak2backup(){
-	debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf ./tweak_exclude_list | cut -f1 | awk '{print $1}')"
+	debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
    	for pkg in $debs; do
 		num=$(($num+1))
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
