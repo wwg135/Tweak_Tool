@@ -8,9 +8,6 @@ nco="\033[0m" #no color
 num=0
 
 bak_dir=./插件备份
-snowboard_dir=./滑雪板主题
-nice_dir=./NiceBarX
-callassist_dir=./电话助手主题
 tweaksetting_dir=./插件配置备份
 sources_dir=./源地址备份
 
@@ -30,32 +27,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 	
 tweak2backup(){
-	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
-	echo -e " [2] - ${nco}只备份插件去除依赖${nco}"
-	echo
-	while true; do
-		echo -ne " (1/2): ${nco}"
-		read st
-		case $st in
-			[1]* ) st=1;
-			echo;
-			echo -e "${nco} 开始备份...${nco}";
-			echo;
-			break;;
-			[2]* ) st=2;
-			echo;
-			echo -e "${nco} 开始备份...${nco}";
-			echo;
-			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
-		esac
-	done
-	if [ $st = 1 ]; then
-		deps="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
-	elif [ $st = 2 ]; then
-		deps="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf ./tweak_exclude_list | cut -f1 | awk '{print $1}')"
-	fi
-	for pkg in $deps; do
+	deps="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf ./tweak_exclude_list | cut -f1 | awk '{print $1}')"
+   for pkg in $deps; do
 		num=$(($num+1))
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
@@ -139,15 +112,8 @@ tweak2backup(){
 
 setting2backup(){
 	echo -e "${nco} 正在进行配置备份，请耐心等待...${nco}"
-	
-	cp -a /var/jb/Library/Themes/* ./"$snowboard_dir"/ 2> /dev/null
-	cp -a /var/mobile/Library/NiceiOS/NiceBarX/* ./"$nice_dir"/ 2> /dev/null
-	cp -a /var/jb/Library/CallAssist/theme/* ./"$callassist_dir"/ 2> /dev/null
-	if [ -e /var/jb/User/NiceiOS ]; then
-        cp -a /var/jb/User/NiceiOS ./"$tweaksetting_dir"/
-    fi;
 	cp -a /var/jb/User/Library ./"$tweaksetting_dir"/ 2> /dev/null
-	cp -a /var/jb/etc/apt/sources.list.d/sileo.sources ./"$sources_dir"/ 2> /dev/null
+	cp -a /var/jb/etc/apt/sources.list.d ./"$sources_dir"/ 2> /dev/null
 	
 	clear
 	yes '' | sed 2q
@@ -157,9 +123,6 @@ setting2backup(){
 
 backup(){
 	mkd $bak_dir
-	mkd $snowboard_dir
-	mkd $nice_dir
-	mkd $callassist_dir
 	mkd $tweaksetting_dir
 	mkd $others_dir
 	mkd $sources_dir
@@ -266,17 +229,12 @@ recover(){
 		sleep 2s
 		echo
 		echo -e "${nco} 开始创建插件目录${nco}"
-		mkd /var/mobile/Library/NiceiOS/NiceBarX
-		mkd /var/jb/Library/CallAssist/theme
 		mkd /var/jb/User/Library/Preferences
 		echo -e "${nco} 目录创建成功${nco}"
 
 		sleep 2s
 		echo
 		echo -e "${nco} 开始恢复插件设置${nco}"
-		cp -a ./"$snowboard_dir"/* /var/jb/Library/Themes/
-		cp -a ./"$nice_dir"/* /var/mobile/Library/NiceiOS/NiceBarX/
-		cp -a ./"$callassist_dir"/* /var/jb/Library/CallAssist/theme/
 		cp -a ./"$tweaksetting_dir"/* /var/jb/User/
 		cp -a ./"$sources_dir"/sileo.sources /var/jb/etc/apt/sources.list.d/
 		chown mobile:staff /var/jb/User/Library/Preferences
@@ -284,9 +242,9 @@ recover(){
 
 		sleep 2s
 		echo
-		echo -e "${nco} 恢复流程已结束，即将重启用户空间，请稍等...${nco}"
-		sleep 5s
-		launchctl reboot userspace
+		echo -e "${nco} 恢复流程已结束，即将注销生效，请稍等...${nco}"
+		sleep 1s
+		killall -9 backboardd
 		EOF
 	else
 		clear
@@ -335,4 +293,4 @@ else
 	echo
 	exit
 fi
-                                                                      
+                                                                  

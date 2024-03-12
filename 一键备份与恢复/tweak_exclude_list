@@ -66,6 +66,7 @@ cmake
 cmake-curses-gui
 cmake-data
 cmark
+com.xina.blacklist
 coreutils
 cowsay
 cowsay-off
@@ -989,6 +990,7 @@ micro
 minisign
 misc-cmds
 mmdb-bin
+mobilesubstrate
 mold
 moon-buggy
 mosh
@@ -1035,7 +1037,6 @@ openssh-client
 openssh-server
 openssh-sftp-server
 openssl
-org.coolstar.sileo
 oslog
 ovh-ttyrec
 p11-kit
@@ -1057,7 +1058,6 @@ plistbuddy
 plutil
 pongoterm
 powder
-preferenceloader
 procursus-keyring
 procursus-keyring
 profile.d
@@ -1220,5 +1220,4 @@ zsh
 zsh-autosuggestions
 zsh-syntax-highlighting
 zsign
-zstd
 zstd
