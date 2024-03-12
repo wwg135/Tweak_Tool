@@ -32,6 +32,7 @@ tweak2backup(){
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
+  		name=$(dpkg-deb -f "$(dpkg-query -L "$pkg" | grep -m1 "/DEBIAN/" | sed 's/\/DEBIAN.*$//')" Name)
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -42,32 +43,32 @@ tweak2backup(){
 			rm -f /var/lib/dpkg/info/"$pkg".list
 			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
 		fi
-		mkdir -p "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/control
+		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
+		dpkg-query -s "$pkg" | grep -v Status >>"$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
 		if [ -d /var/jb/Library/dpkg/info ];then
-			cp /var/jb/Library/dpkg/info/"$pkg".postinst "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".preinst "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".postrm "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".prerm "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".extrainst_ "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".extrainst "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".control-e "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".triggers "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".conffiles "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".ldid "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
-			cp /var/jb/Library/dpkg/info/"$pkg".crash_reporter "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".postinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".preinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".postrm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".prerm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".extrainst_ "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".extrainst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".control-e "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".triggers "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".conffiles "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".ldid "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
+			cp /var/jb/Library/dpkg/info/"$pkg".crash_reporter "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
 		else
-			cp /var/lib/dpkg/info/"$pkg".postinst "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".preinst "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".postrm "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".prerm "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".extrainst_ "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".extrainst "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".control-e "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".triggers "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".conffiles "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".ldid "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
-			cp /var/lib/dpkg/info/"$pkg".crash_reporter "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".postinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".preinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".postrm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".prerm "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".extrainst_ "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".extrainst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".control-e "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".triggers "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".conffiles "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".ldid "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
+			cp /var/lib/dpkg/info/"$pkg".crash_reporter "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
 		fi
 
 		SAVEIFS=$IFS
@@ -75,14 +76,14 @@ tweak2backup(){
 		files=$(dpkg-query -L "$pkg"|sed "1 d")
 		for i in $files; do
 			if [ -d "$i" ]; then
-				mkdir -p "$bak_dir"/"$pkg"_"$ver"_"$arc"/"$i"
+				mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
 			elif [ -f "$i" ]; then
-				cp -p "$i" "$bak_dir"/"$pkg"_"$ver"_"$arc"/"$i"
+				cp -p "$i" "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
 			fi
 		done
 		IFS=$SAVEIFS
 
-		rootdir="$bak_dir"/"$pkg"_"$ver"_"$arc"
+		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			if [ -d "$rootdir"/var/jb ]; then
 				mkdir -p "$rootdir"/temp
@@ -97,8 +98,8 @@ tweak2backup(){
 
 		echo
 		echo -e "${nco} 已成功备份"$num"个插件${nco}"
-		dpkg-deb -b "$bak_dir"/"$pkg"_"$ver"_"$arc" 2>&1
-		rm -rf "$bak_dir"/"$pkg"_"$ver"_"$arc" 2>&1
+		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
 		echo
 	done
 
@@ -257,7 +258,7 @@ recover(){
 
 echo
 echo -e "${nco} 欢迎使用一键备份和恢复工具${nco}"
-echo -e "${nco} 本工具由预言小猫优化整合${nco}"
+echo -e "${nco} 本工具由预言小猫优化整合，由M哥修改${nco}"
 echo -e "${nco} 鸣谢：菠萝 & 建哥${nco}"
 echo
 echo -e "${nco} 请选择对应功能${nco}"
