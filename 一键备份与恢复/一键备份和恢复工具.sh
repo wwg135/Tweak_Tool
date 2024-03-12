@@ -32,7 +32,7 @@ tweak2backup(){
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
-  		name=$(dpkg-query -s "$pkg" | grep Package | awk '{print $2}')
+  		name=$(dpkg-query -s "$pkg" | grep Package | awk '{print $2}' | awk -F':' '{print $2}')
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -44,7 +44,7 @@ tweak2backup(){
 			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
 		fi
 		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status >>"$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
+		dpkg-query -s "$pkg" | grep -v Status >> "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
 		if [ -d /var/jb/Library/dpkg/info ];then
 			cp /var/jb/Library/dpkg/info/"$pkg".postinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
 			cp /var/jb/Library/dpkg/info/"$pkg".preinst "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
