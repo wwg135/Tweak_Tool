@@ -188,36 +188,12 @@ backup(){
 		echo
 	fi
 
-	echo -e " [1] ${red}是 ${nco}- 新建备份文件夹${nco}"
-	echo -e " [2] ${red}否 ${nco}- 取消新建备份文件夹${nco}"
 	echo
-	while true; do
-		echo -ne " (1/2): ${nco}"
-		read st
-		case $st in
-			[1]* ) st=1;
-			break;;
-			[2]* ) st=2;
-			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
-		esac
-	done
-
-	if [ $st = 1 ]; then
-		yes '' | sed 2q
-		echo -e "${nco} 开始新建备份文件夹！${nco}"
-		echo
-		new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
-		mkdir $new_dir
- 		mv ./* "$new_dir/"
-   		echo -e "${red}新备份文件：$new_dir${red}"
-		echo
-	else
-		clear
-		yes '' | sed 2q
-		echo -e "${nco} 已取消新建备份文件夹！${nco}"
-		echo
-	fi
+	new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
+	mkdir $new_dir
+ 	mv ./* "$new_dir/"
+   	echo -e "${red}新备份文件：$new_dir${red}"
+	echo
 
 	echo -e "${nco} 备份流程已结束，感谢耐心等待！${nco}"
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
