@@ -121,7 +121,17 @@ setting2backup(){
 	echo
 }
 
+newbackup(){
+	new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
+	mkdir $new_dir
+ 	mv -v ./* "$new_dir/"
+}
+
 backup(){
+	if [ -d "$bak_dir" ] || [ -d "$tweaksetting_dir" ] || [ -d "$sources_dir" ]; then
+    		rm -rf "$bak_dir" "$tweaksetting_dir" "$sources_dir"
+	fi
+
 	mkd $bak_dir
 	mkd $tweaksetting_dir
 	mkd $sources_dir
@@ -184,9 +194,7 @@ backup(){
 		echo
 	fi
 
-	new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
-	mkdir $new_dir
- 	mv -v ./* "$new_dir/"
+	newbackup
 
 	echo -e "${nco} 备份流程已结束，感谢耐心等待！${nco}"
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
