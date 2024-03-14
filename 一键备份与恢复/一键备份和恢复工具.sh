@@ -131,6 +131,7 @@ tweak2backup(){
 	echo
 	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
 	echo -e " [2] - ${nco}备份插件过滤系统依赖${nco}"
+ 	echo -e " [3] - ${nco}查看"备份插件过滤系统依赖"的插件列表${nco}"
 	echo
 	while true; do
 		echo -ne " (1/2/3): ${nco}"
@@ -146,13 +147,33 @@ tweak2backup(){
 			echo -e "${nco} 开始备份...${nco}";
 			echo;
 			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 "${nco};
+   			[3]* ) st=3;
+			echo;
+			echo -e "${nco} 开始备份...${nco}";
+			echo;
+			break;;
+			* ) echo -e ${red}" 请输入 1 或 2 或 3 "${nco};
 		esac
 	done
 	if [ $st = 1 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
+  	elif [ $st = 3 ]; then
+   		debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
+     		IFS=$'\n'
+		for i in $debs; do
+			num=$((num+1))
+			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
+			echo "$num. $name"
+		done
+		IFS=$SAVEIFS
+  		echo
+    
+    		clear
+		yes '' | sed 2q
+		echo -e "${nco} DONE！${nco}"
+		echo
 	fi
  	total_time=0
    	for pkg in $debs; do
