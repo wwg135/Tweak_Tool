@@ -208,17 +208,7 @@ tweak2backup(){
 		checkPremissions "$conffiles"
 		checkPremissions "$ldid"
 		checkPremissions "$crash_reporter"
-		cp "$postinst" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postinst 2> /dev/null
-		cp "$preinst" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/preinst 2> /dev/null
-		cp "$postrm" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/postrm 2> /dev/null
-		cp "$prerm" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/prerm 2> /dev/null
-		cp "$extrainst_" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst_ 2> /dev/null
-		cp "$extrainst" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/extrainst 2> /dev/null
-		cp "$control" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control-e 2> /dev/null
-		cp "$triggers" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/triggers 2> /dev/null
-		cp "$conffiles" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/conffiles 2> /dev/null
-		cp "$ldid" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/ldid 2> /dev/null
-		cp "$crash_reporter" "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/crash_reporter 2> /dev/null
+		echo "$postinst $preinst $postrm $prerm $extrainst_ $extrainst $control $triggers $conffiles $ldid $crash_reporter" | xargs -n1 -P8 rsync -a {} "$bak_dir/$name_$ver_$arc/DEBIAN/" 2> /dev/null
 
 		SAVEIFS=$IFS
 		IFS=$'\n'
