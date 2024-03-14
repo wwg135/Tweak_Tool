@@ -31,6 +31,7 @@ bat
 bender
 binwalk
 bison
+blacklist
 bootstrap-cmds
 bottom
 bpytop
@@ -66,7 +67,6 @@ cmake
 cmake-curses-gui
 cmake-data
 cmark
-com.xina.blacklist
 coreutils
 cowsay
 cowsay-off
