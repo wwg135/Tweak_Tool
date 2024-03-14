@@ -153,6 +153,7 @@ tweak2backup(){
 			echo
 			echo -e "${nco} 以下是可备份插件列表,请输入序号进行备份:${nco}"
 			IFS=$'\n'
+   			num=0
 			for i in $debs; do
 				num=$((num+1))
 				name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)  
