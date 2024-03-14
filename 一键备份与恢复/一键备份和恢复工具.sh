@@ -14,9 +14,9 @@ tweaksetting_dir=./插件配置备份
 sources_dir=./源地址备份
 
 mkd(){
-    if [ ! -d $1 ]; then
-        mkdir -p $1;
-    fi;
+	if [ ! -d $1 ]; then
+        	mkdir -p $1;
+    	fi;
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -29,12 +29,12 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 checkPremissions(){
-    if [ -e $1 ]; then
+	if [ -e $1 ]; then
 		f_p=`stat -c %a $1`
 		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
 			chmod 755 $1
 		fi
-    fi
+    	fi
 }
 
 dpkgfill(){
