@@ -281,7 +281,7 @@ setting2backup(){
 	echo
 }
 
-backup(){
+backup() {
 	start_time=$(date +%s)
 	if [ -d "$bak_dir" ] || [ -d "$tweaksetting_dir" ] || [ -d "$sources_dir" ]; then
     		rm -rf "$bak_dir" "$tweaksetting_dir" "$sources_dir"
@@ -313,8 +313,11 @@ backup(){
 	if [ $st = 1 ]; then
 		yes '' | sed 2q
 		echo -e "${nco} 开始检查包完整性！${nco}"
+		start_time_plugins=$(date +%s)
 		echo
 		dpkgfill
+		end_time_plugins=$(date +%s)
+		plugins_time=$((end_time_plugins-start_time_plugins))
 	else
 		clear
 		yes '' | sed 2q
@@ -340,8 +343,11 @@ backup(){
 	if [ $st = 1 ]; then
 		yes '' | sed 2q
 		echo -e "${nco} 开始进行配置备份！${nco}"
+		start_time_settings=$(date +%s)
 		echo
 		setting2backup
+		end_time_settings=$(date +%s)
+		settings_time=$((end_time_settings-start_time_settings))
 	else
 		clear
 		yes '' | sed 2q
@@ -363,12 +369,13 @@ backup(){
 	echo
 
 	end_time=$(date +%s)
-	total_time=$((end_time-start_time))
+	total_time_initial=$((end_time-start_time))
+	total_time_total=$((total_time_initial + plugins_time + settings_time))
  	if [ $total_time -lt 60 ]; then
-		echo -e "${nco} 备份流程已结束，耗时：${red}"$total_time" ${nco}秒，感谢耐心等待！${nco}"
+		echo -e "${nco} 备份流程已结束，耗时：${red}"$total_time_total" ${nco}秒，感谢耐心等待！${nco}"
   	else
-		minutes=$((total_time/60))
-		seconds=$((total_time%60))
+		minutes=$((total_time_total/60))
+		seconds=$((total_time_total%60))
 		echo -e "${nco} 备份流程已结束，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒，感谢耐心等待！${nco}"
 	fi
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
