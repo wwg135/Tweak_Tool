@@ -282,6 +282,7 @@ setting2backup(){
 }
 
 backup(){
+	start_time=$(date +%s)
 	if [ -d "$bak_dir" ] || [ -d "$tweaksetting_dir" ] || [ -d "$sources_dir" ]; then
     		rm -rf "$bak_dir" "$tweaksetting_dir" "$sources_dir"
 	fi
@@ -361,7 +362,15 @@ backup(){
    	echo -e "${nco}新备份文件：${red}$new_dir$"
 	echo
 
-	echo -e "${nco} 备份流程已结束，感谢耐心等待！${nco}"
+	end_time=$(date +%s)
+	total_time=$((end_time-start_time))
+ 	if [ $total_time -lt 60 ]; then
+		echo -e "${nco} 备份流程已结束，耗时：${red}"$total_time" ${nco}秒，感谢耐心等待！${nco}"
+  	else
+		minutes=$((total_time/60))
+		seconds=$((total_time%60))
+		echo -e "${nco} 备份流程已结束，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒，感谢耐心等待！${nco}"
+	fi
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
 	echo
 }
