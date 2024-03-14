@@ -365,7 +365,7 @@ backup() {
        			mv "$file" "$new_dir/"
      		fi
    	done
-   	echo -e "${nco}新备份文件：${red}$new_dir$"
+   	echo -e "${nco}新备份文件：${red}$new_dir"
 	echo
 
 	end_time=$(date +%s)
