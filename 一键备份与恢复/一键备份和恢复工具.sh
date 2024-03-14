@@ -161,8 +161,8 @@ tweak2backup(){
 			IFS=$SAVEIFS
 			read -p "请输入序号:" num
       			name=${debs[$num-1]} 
-	 		deb=$(dpkg-query -s "$name" | grep ^Package)
-    			selectdebs "$deb"
+	 		pkg=$(dpkg-query -s "$name" | grep ^Package)
+    			selectdebs "$pkg"
 			break
 			;;
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
@@ -290,113 +290,110 @@ tweak2backup(){
 }
 
 selectdebs(){
-  	deb=$1
-  	for pkg in $deb; do
-    		start_time=$(date +%s)
-    		num=$(($num+1))
-		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
-		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
-  		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
-    		echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
-		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
-			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
-			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
-			sed -i -e 's#^#/var/jb#' /var/lib/dpkg/info/"$pkg".list.nonvar
-			cat /var/lib/dpkg/info/"$pkg".list | grep "/var" > /var/lib/dpkg/info/"$pkg".list.var
-			cat /var/lib/dpkg/info/"$pkg".list.var >> /var/lib/dpkg/info/"$pkg".list.nonvar
-			rm -f /var/lib/dpkg/info/"$pkg".list.var
-			rm -f /var/lib/dpkg/info/"$pkg".list
-			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
-		fi
-		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status >> "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
-  		if [ -d /var/jb/Library/dpkg/info ];then
-			postinst=/var/jb/Library/dpkg/info/"$pkg".postinst
-			preinst=/var/jb/Library/dpkg/info/"$pkg".preinst
-			postrm=/var/jb/Library/dpkg/info/"$pkg".postrm
-			prerm=/var/jb/Library/dpkg/info/"$pkg".prerm
-			extrainst_=/var/jb/Library/dpkg/info/"$pkg".extrainst_
-			extrainst=/var/jb/Library/dpkg/info/"$pkg".extrainst
-			control=/var/jb/Library/dpkg/info/"$pkg".control-e
-			triggers=/var/jb/Library/dpkg/info/"$pkg".triggers
-			conffiles=/var/jb/Library/dpkg/info/"$pkg".conffiles
-			ldid=/var/jb/Library/dpkg/info/"$pkg".ldid
-			crash_reporter=/var/jb/Library/dpkg/info/"$pkg".crash_reporter
-		else
-			postinst=/var/lib/dpkg/info/"$pkg".postinst
-			preinst=/var/lib/dpkg/info/"$pkg".preinst
-			postrm=/var/lib/dpkg/info/"$pkg".postrm
-			prerm=/var/lib/dpkg/info/"$pkg".prerm
-			extrainst_=/var/lib/dpkg/info/"$pkg".extrainst_
-			extrainst=/var/lib/dpkg/info/"$pkg".extrainst
-			control=/var/lib/dpkg/info/"$pkg".control-e
-			triggers=/var/lib/dpkg/info/"$pkg".triggers
-			conffiles=/var/lib/dpkg/info/"$pkg".conffiles
-			ldid=/var/lib/dpkg/info/"$pkg".ldid
-			crash_reporter=/var/lib/dpkg/info/"$pkg".crash_reporter
-		fi
-		checkPremissions "$postinst"
-		checkPremissions "$preinst"
-		checkPremissions "$postrm"
-		checkPremissions "$prerm"
-		checkPremissions "$extrainst_"
-		checkPremissions "$extrainst"
-		checkPremissions "$control"
-		checkPremissions "$triggers"
-		checkPremissions "$conffiles"
-		checkPremissions "$ldid"
-		checkPremissions "$crash_reporter"
-		rsync -a "$postinst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/postinst 2> /dev/null
-		rsync -a "$preinst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/preinst 2> /dev/null
-		rsync -a "$postrm" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/postrm 2> /dev/null
-		rsync -a "$prerm" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/prerm 2> /dev/null
-		rsync -a "$extrainst_" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/extrainst_ 2> /dev/null
-		rsync -a "$extrainst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/extrainst 2> /dev/null
-		rsync -a "$control" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/control-e 2> /dev/null
-		rsync -a "$triggers" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/triggers 2> /dev/null
-		rsync -a "$conffiles" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/conffiles 2> /dev/null
-		rsync -a "$ldid" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/ldid 2> /dev/null
-		rsync -a "$crash_reporter" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/crash_reporter 2> /dev/null
+  	pkg=$1
+    	start_time=$(date +%s)
+	ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
+	arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
+  	name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
+    	echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
+	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
+		cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
+		cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
+		sed -i -e 's#^#/var/jb#' /var/lib/dpkg/info/"$pkg".list.nonvar
+		cat /var/lib/dpkg/info/"$pkg".list | grep "/var" > /var/lib/dpkg/info/"$pkg".list.var
+		cat /var/lib/dpkg/info/"$pkg".list.var >> /var/lib/dpkg/info/"$pkg".list.nonvar
+		rm -f /var/lib/dpkg/info/"$pkg".list.var
+		rm -f /var/lib/dpkg/info/"$pkg".list
+		mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
+	fi
+	mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
+	dpkg-query -s "$pkg" | grep -v Status >> "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
+  	if [ -d /var/jb/Library/dpkg/info ];then
+		postinst=/var/jb/Library/dpkg/info/"$pkg".postinst
+		preinst=/var/jb/Library/dpkg/info/"$pkg".preinst
+		postrm=/var/jb/Library/dpkg/info/"$pkg".postrm
+		prerm=/var/jb/Library/dpkg/info/"$pkg".prerm
+		extrainst_=/var/jb/Library/dpkg/info/"$pkg".extrainst_
+		extrainst=/var/jb/Library/dpkg/info/"$pkg".extrainst
+		control=/var/jb/Library/dpkg/info/"$pkg".control-e
+		triggers=/var/jb/Library/dpkg/info/"$pkg".triggers
+		conffiles=/var/jb/Library/dpkg/info/"$pkg".conffiles
+		ldid=/var/jb/Library/dpkg/info/"$pkg".ldid
+		crash_reporter=/var/jb/Library/dpkg/info/"$pkg".crash_reporter
+	else
+		postinst=/var/lib/dpkg/info/"$pkg".postinst
+		preinst=/var/lib/dpkg/info/"$pkg".preinst
+		postrm=/var/lib/dpkg/info/"$pkg".postrm
+		prerm=/var/lib/dpkg/info/"$pkg".prerm
+		extrainst_=/var/lib/dpkg/info/"$pkg".extrainst_
+		extrainst=/var/lib/dpkg/info/"$pkg".extrainst
+		control=/var/lib/dpkg/info/"$pkg".control-e
+		triggers=/var/lib/dpkg/info/"$pkg".triggers
+		conffiles=/var/lib/dpkg/info/"$pkg".conffiles
+		ldid=/var/lib/dpkg/info/"$pkg".ldid
+		crash_reporter=/var/lib/dpkg/info/"$pkg".crash_reporter
+	fi
+	checkPremissions "$postinst"
+	checkPremissions "$preinst"
+	checkPremissions "$postrm"
+	checkPremissions "$prerm"
+	checkPremissions "$extrainst_"
+	checkPremissions "$extrainst"
+	checkPremissions "$control"
+	checkPremissions "$triggers"
+	checkPremissions "$conffiles"
+	checkPremissions "$ldid"
+	checkPremissions "$crash_reporter"
+	rsync -a "$postinst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/postinst 2> /dev/null
+	rsync -a "$preinst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/preinst 2> /dev/null
+	rsync -a "$postrm" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/postrm 2> /dev/null
+	rsync -a "$prerm" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/prerm 2> /dev/null
+	rsync -a "$extrainst_" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/extrainst_ 2> /dev/null
+	rsync -a "$extrainst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/extrainst 2> /dev/null
+	rsync -a "$control" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/control-e 2> /dev/null
+	rsync -a "$triggers" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/triggers 2> /dev/null
+	rsync -a "$conffiles" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/conffiles 2> /dev/null
+	rsync -a "$ldid" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/ldid 2> /dev/null
+	rsync -a "$crash_reporter" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/crash_reporter 2> /dev/null
 
-		SAVEIFS=$IFS
-		IFS=$'\n'
-		files=$(dpkg-query -L "$pkg"|sed "1 d")
-		for i in $files; do
-			if [ -d "$i" ]; then
-				mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
-			elif [ -f "$i" ]; then
-				cp -p "$i" "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
-			fi
-		done
-		IFS=$SAVEIFS
-
-		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
-		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
-			if [ -d "$rootdir"/var/jb ]; then
-				mkdir -p "$rootdir"/temp
-				mv -f "$rootdir"/var/jb/.* "$rootdir"/var/jb/* "$rootdir"/temp >/dev/null 2>&1 || true
-				rm -rf "$rootdir"/var/jb
-				[ -d "$rootdir"/var ] && [ "$(ls -A "$rootdir"/var)" ] && : || rm -rf "$rootdir"/var
-				mv -f "$rootdir"/temp/.* "$rootdir"/temp/* "$rootdir" >/dev/null 2>&1 || true
-				rm -rf "$rootdir"/temp
-			fi
-			mv -f /var/lib/dpkg/info/"$pkg".list.debra /var/lib/dpkg/info/"$pkg".list
+	SAVEIFS=$IFS
+	IFS=$'\n'
+	files=$(dpkg-query -L "$pkg"|sed "1 d")
+	for i in $files; do
+		if [ -d "$i" ]; then
+			mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
+		elif [ -f "$i" ]; then
+			cp -p "$i" "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
 		fi
-
-		echo
-  		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
-		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
-  		end_time=$(date +%s)
-		total_time=$((end_time-start_time))
-		if [ $total_time -lt 60 ]; then
-			echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
-		else
-			minutes=$((total_time/60))
-			seconds=$((total_time%60))
-			echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒"
-		fi
-		echo
 	done
+	IFS=$SAVEIFS
+
+	rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
+	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
+		if [ -d "$rootdir"/var/jb ]; then
+			mkdir -p "$rootdir"/temp
+			mv -f "$rootdir"/var/jb/.* "$rootdir"/var/jb/* "$rootdir"/temp >/dev/null 2>&1 || true
+			rm -rf "$rootdir"/var/jb
+			[ -d "$rootdir"/var ] && [ "$(ls -A "$rootdir"/var)" ] && : || rm -rf "$rootdir"/var
+			mv -f "$rootdir"/temp/.* "$rootdir"/temp/* "$rootdir" >/dev/null 2>&1 || true
+			rm -rf "$rootdir"/temp
+		fi
+		mv -f /var/lib/dpkg/info/"$pkg".list.debra /var/lib/dpkg/info/"$pkg".list
+	fi
+
+	echo
+  	dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
+	rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+  	end_time=$(date +%s)
+	total_time=$((end_time-start_time))
+	if [ $total_time -lt 60 ]; then
+		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
+	else
+		minutes=$((total_time/60))
+		seconds=$((total_time%60))
+		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒"
+	fi
+	echo
 
 	clear
 	unset pkg
