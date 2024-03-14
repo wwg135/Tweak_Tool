@@ -1,8 +1,7 @@
 #!/bin/bash
 PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
-_command="${0##*/}"
-export LANG=en_US.UTF-
+export LANG=en_US.UTF-8
 
 # colors
 red="\033[38;5;196m"
@@ -14,9 +13,9 @@ tweaksetting_dir=./插件配置备份
 sources_dir=./源地址备份
 
 mkd(){
-	if [ ! -d $1 ]; then
-        	mkdir -p $1;
-    	fi;
+    if [ ! -e $1 ]; then
+        mkdir -p $1;
+    fi;
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -29,15 +28,50 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 checkPremissions(){
-	if [ -e $1 ]; then
+    if [ -e $1 ]; then
 		f_p=`stat -c %a $1`
 		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
 			chmod 755 $1
 		fi
-    	fi
+    fi
+}
+
+_check_dpkg_run(){
+	_wait=1
+	while [ '1' -le '2' ]; do
+		_check="$(ps -ef | grep dpkg | grep -v grep | grep -v "$$" | grep -v "sudo ${0##*/}" | wc -l)"
+		if [ "${_check}" -ge '1' ]; then
+			_wait="$((_wait+1))"
+			sleep 1
+		else
+			break
+		fi
+	done
+	unset _check _wait
+}
+
+_run(){
+	if [ -n "${_package_row}" ]; then
+		case "${_lack}" in
+			description)
+				_fill="Description: An awesome MobileSubstrate tweak"\!
+			;;
+			maintainer)
+				_fill="Maintainer: someone"
+			;;
+			*)
+				break
+			;;
+		esac
+		if [ -n "${_fill}" ]; then
+			sed -i.tmp "${_package_row}a ${_fill}" "${_stash_file}"
+		fi
+	fi
+	unset _package _package_row _lack _fill
 }
 
 dpkgfill(){
+	_command="${0##*/}"
 	date >>/tmp/000
 	shopt -s expand_aliases 2>>/dev/null
 	if which lecho 2>>/dev/null 1>>/dev/null; then
@@ -47,31 +81,7 @@ dpkgfill(){
 			alias lecho="lecho -c ${0##*/}"
 		fi
 	fi
-
 	unset _check
-
-	_check_dpkg_run(){
-		_wait=1
-		while [ '1' -le '2' ]; do
-			_check="$(ps -ef | grep dpkg | grep -v grep | grep -v "$$" | grep -v "sudo ${0##*/}" | wc -l)"
-			if [ "${_check}" -ge '1' ]; then
-				_wait="$((_wait+1))"
-				sleep 1
-			else
-				break
-			fi
-		done
-		unset _check _wait _w
-	}
-
-	_run(){
-		if [ -n "${_package_row}" ]; then
-			if [ -n "${_fill}" ]; then
-				sed -i.tmp "${_package_row}a ${_fill}" "${_stash_file}"
-			fi
-		fi
-		unset _package _package_row _lack _fill
-	}
 
 	_check_dpkg_run
 	i='0'
@@ -89,6 +99,17 @@ dpkgfill(){
 		fi
 		unset _stash_file_0
 		while [ "${i}" -le "${i_max}" ]; do
+			case "$(dpkg -S / 2>&1 | grep -E 'warning|escription|aintainer' | sed -n 2p)" in
+				*escription*)
+					_lack='description'
+					;;
+				*aintainer*)
+					_lack='maintainer'
+					;;
+				*)
+					break
+					;;
+			esac
 			_package="$(dpkg -S / 2>&1 | grep -E 'warning|escription|aintainer' | sed -n 1p)"
 			_package="${_package%\'*}"
 			_package="${_package##*\'}"
@@ -97,11 +118,10 @@ dpkgfill(){
 			_run
 			i="$((i+1))"
 		done
-		echo -e "${nco} 已修补包信息${nco}";
+		echo -e "${nco} 已修补包缺失信息${nco}";
 	fi
 	rm -f "${_stash_file}.tmp"
 	rm -rf "/tmp/dpkg-fill"
-	echo -e "${nco} 准备进入下一环节...${nco}";
 	tweak2backup
 }
 	
