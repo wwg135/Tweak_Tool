@@ -131,7 +131,7 @@ tweak2backup(){
 	echo
 	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
 	echo -e " [2] - ${nco}备份插件过滤系统依赖${nco}"
- 	echo -e " [3] - ${nco}查看"备份插件过滤系统依赖"的插件列表${nco}"
+ 	echo -e " [3] - ${nco}查看${red}备份插件过滤系统依赖${nco}的插件列表${nco}"
 	echo
 	while true; do
 		echo -ne " (1/2/3): ${nco}"
@@ -171,8 +171,8 @@ tweak2backup(){
   		echo
     
     		clear
-		yes '' | sed 2q
-		echo -e "${nco} DONE！${nco}"
+      		yes '' | sed 2q
+		tweak2backup
 		echo
 	fi
  	total_time=0
