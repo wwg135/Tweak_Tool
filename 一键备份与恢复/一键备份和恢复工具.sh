@@ -203,8 +203,8 @@ backup_and_pack() {
 
     echo
     echo -e "${nco} 已成功备份插件： ${red}$name${red}"
-    dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
-    rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+    dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
+    rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
     echo
 }
 
