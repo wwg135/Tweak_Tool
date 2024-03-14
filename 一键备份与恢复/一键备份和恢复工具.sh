@@ -378,6 +378,7 @@ backup() {
 		seconds=$((total_time_total%60))
 		echo -e "${nco} 备份流程已结束，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒，感谢耐心等待！${nco}"
 	fi
+ 	echo
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
 	echo
 }
