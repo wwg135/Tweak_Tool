@@ -351,15 +351,13 @@ backup(){
 	echo
 	new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
- 	for file in ./*
-   do
-     if [[ $file == "./一键备份和恢复工具.sh" ]]
-     then
-       cp "$file" "$new_dir/"
-     else
-       mv "$file" "$new_dir/"
-     fi
-   done
+ 	for file in ./*; do
+     		if [[ $file == "./一键备份和恢复工具.sh" ]]; then
+       			cp "$file" "$new_dir/"
+     		else
+       			mv "$file" "$new_dir/"
+     		fi
+   	done
    	echo -e "${nco}新备份文件：${red}$new_dir$"
 	echo
 
