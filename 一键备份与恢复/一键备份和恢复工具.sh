@@ -149,21 +149,9 @@ tweak2backup(){
 			break;;
    			[3]* )
 			st=3;
-			debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
-			echo
+			echo;
 			echo -e "${nco} 以下是可备份插件列表,请输入序号进行备份:${nco}"
-			IFS=$'\n'
-   			num=0
-			for i in $debs; do
-				num=$((num+1))
-				name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)  
-				echo "$num. $name"
-			done
-			IFS=$SAVEIFS
-			read -p "请输入序号:" num
-      			name=${debs[$num-1]} 
-	 		pkg=$(dpkg-query -s "$name" | grep ^Package)
-    			selectdebs "$pkg"
+   			echo;
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 "${nco};
 		esac
@@ -172,6 +160,16 @@ tweak2backup(){
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
+  	elif [ $st = 3 ]; then
+   		debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
+		IFS=$'\n'
+		for i in $debs; do
+			num=$((num+1))
+			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)  
+			echo "$num. $name"
+		done
+		IFS=$SAVEIFS
+		read -p "请输入序号:" num
 	fi
  	total_time=0
    	for pkg in $debs; do
