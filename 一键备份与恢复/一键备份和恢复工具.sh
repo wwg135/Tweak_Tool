@@ -329,7 +329,7 @@ backup(){
        mv "$file" "$new_dir/"
      fi
    done
-   	echo -e "${red}新备份文件：$new_dir${red}"
+   	echo -e "${nco}新备份文件：${red}$new_dir$"
 	echo
 
 	echo -e "${nco} 备份流程已结束，感谢耐心等待！${nco}"
