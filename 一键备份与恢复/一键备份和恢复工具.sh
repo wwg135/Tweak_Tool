@@ -135,11 +135,11 @@ tweak2backup(){
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 	fi
    	for pkg in $debs; do
-		num=$(($num+1))
-		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
+    		num=$(($num+1))
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
   		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
+    		echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -228,7 +228,7 @@ tweak2backup(){
 		echo
   		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
 		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
-		echo -e "${nco}成功备份：${red}"$name" ${nco}已备份${red}"$num"${nco}个插件"
+		echo -e "已成功备份 ${red}"$num"${nco} 个插件"
 		echo
 	done
 
