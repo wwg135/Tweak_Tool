@@ -1,6 +1,9 @@
 #!/bin/bash
 PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
+_command="${0##*/}"
+export LANG=en_US.UTF-
+
 # colors
 red="\033[38;5;196m"
 nco="\033[0m" #no color
@@ -11,9 +14,9 @@ tweaksetting_dir=./插件配置备份
 sources_dir=./源地址备份
 
 mkd(){
-	if [ ! -d $1 ]; then
-        	mkdir -p $1;
-    	fi;
+    if [ ! -d $1 ]; then
+        mkdir -p $1;
+    fi;
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -26,16 +29,111 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 checkPremissions(){
-    	if [ -e $1 ]; then
+    if [ -e $1 ]; then
 		f_p=`stat -c %a $1`
 		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
 			chmod 755 $1
 		fi
-    	fi
+    fi
+}
+
+dpkgfill(){
+	date >>/tmp/000
+	shopt -s expand_aliases 2>>/dev/null
+	if which lecho 2>>/dev/null 1>>/dev/null; then
+		if [ -n "${LANG}" ]; then
+			alias lecho="lecho -c ${0##*/} -l ${LANG}"
+		else
+			alias lecho="lecho -c ${0##*/}"
+		fi
+	fi
+
+	unset _check
+
+	_check_dpkg_run(){
+		_wait=1
+		while [ '1' -le '2' ]; do
+			_check="$(ps -ef | grep dpkg | grep -v grep | grep -v "$$" | grep -v "sudo ${0##*/}" | wc -l)"
+			if [ "${_check}" -ge '1' ]; then
+				_wait="$((_wait+1))"
+				sleep 1
+			else
+				break
+			fi
+		done
+		unset _check _wait _w
+	}
+
+	_run(){
+		if [ -n "${_package_row}" ]; then
+			if [ -n "${_fill}" ]; then
+				sed -i.tmp "${_package_row}a ${_fill}" "${_stash_file}"
+			fi
+		fi
+		unset _package _package_row _lack _fill
+	}
+
+	_check_dpkg_run
+	i='0'
+	i_max="$(dpkg -S / 2>&1 | grep -E 'escription|aintainer' | wc -l)"
+	if [ "${i_max}" -eq '0' ]; then
+		echo -e "${nco} 没有发现错误${nco}";
+	else
+		_stash_file_0="$(dpkg -S / 2>&1)"
+		_stash_file_0="${_stash_file_0#*\'}"
+		_stash_file_0="${_stash_file_0%%\'*}"
+		if [ -z "$(echo "${_stash_file_0}" | grep '/')" ]; then
+			_stash_file='/var/lib/dpkg/status'
+		else
+			_stash_file="${_stash_file_0}"
+		fi
+		unset _stash_file_0
+		while [ "${i}" -le "${i_max}" ]; do
+			_package="$(dpkg -S / 2>&1 | grep -E 'warning|escription|aintainer' | sed -n 1p)"
+			_package="${_package%\'*}"
+			_package="${_package##*\'}"
+			_package_row="$(sed -n "/^Package: ${_package}$/=" "${_stash_file}")"
+			_check_dpkg_run
+			_run
+			i="$((i+1))"
+		done
+		echo -e "${nco} 已修补包信息${nco}";
+	fi
+	rm -f "${_stash_file}.tmp"
+	rm -rf "/tmp/dpkg-fill"
+	echo -e "${nco} 准备进入下一环节...${nco}";
+	tweak2backup
 }
 	
 tweak2backup(){
-	debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
+	yes '' | sed 2q
+	echo -e "${nco} 开始进行插件备份！${nco}"
+	echo
+	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
+	echo -e " [2] - ${nco}备份插件过滤系统依赖${nco}"
+	echo
+	while true; do
+		echo -ne " (1/2): ${nco}"
+		read st
+		case $st in
+			[1]* ) st=1;
+			echo;
+			echo -e "${nco} 开始备份...${nco}";
+			echo;
+			break;;
+			[2]* ) st=2;
+			echo;
+			echo -e "${nco} 开始备份...${nco}";
+			echo;
+			break;;
+			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
+		esac
+	done
+	if [ $st = 1 ]; then
+		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
+	elif [ $st = 2 ]; then
+		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
+	fi
    	for pkg in $debs; do
 		num=$(($num+1))
 		echo -e "${nco} 正在备份第"$num"个插件，请耐心等待...${nco}"
@@ -182,9 +280,9 @@ backup(){
 
 	if [ $st = 1 ]; then
 		yes '' | sed 2q
-		echo -e "${nco} 开始进行插件备份！${nco}"
+		echo -e "${nco} 开始检查包完整性！${nco}"
 		echo
-		tweak2backup
+		dpkgfill
 	else
 		clear
 		yes '' | sed 2q
@@ -222,7 +320,15 @@ backup(){
 	echo
 	new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
- 	mv ./* "$new_dir/"
+ 	for file in ./*
+   do
+     if [[ $file == "./一键备份和恢复工具.sh" ]]
+     then
+       cp "$file" "$new_dir/"
+     else
+       mv "$file" "$new_dir/"
+     fi
+   done
    	echo -e "${red}新备份文件：$new_dir${red}"
 	echo
 
@@ -286,6 +392,7 @@ recover(){
 		echo -e "${nco} 恢复流程已结束，即将注销生效，请稍等...${nco}"
 		sleep 1s
 		killall -9 backboardd
+		killall -9 SpringBoard
 		EOF
 	else
 		clear
