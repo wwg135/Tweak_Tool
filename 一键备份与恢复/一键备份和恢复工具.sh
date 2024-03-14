@@ -131,10 +131,9 @@ tweak2backup(){
 	echo
 	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
 	echo -e " [2] - ${nco}备份插件过滤系统依赖${nco}"
- 	echo -e " [3] - ${nco}从列表选择插件备份${nco}"
 	echo
 	while true; do
-		echo -ne " (1/2/3): ${nco}"
+		echo -ne " (1/2): ${nco}"
 		read st
 		case $st in
 			[1]* ) st=1;
@@ -165,6 +164,7 @@ tweak2backup(){
 		echo "$num. $name"
 		done
 	IFS=$SAVEIFS
+ 	break;;
  	echo
 
    	for pkg in $debs; do
