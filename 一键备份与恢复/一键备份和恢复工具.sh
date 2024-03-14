@@ -131,9 +131,10 @@ tweak2backup(){
 	echo
 	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
 	echo -e " [2] - ${nco}备份插件过滤系统依赖${nco}"
+ 	echo -e " [3] - ${nco}从列表选择插件备份${nco}"
 	echo
 	while true; do
-		echo -ne " (1/2): ${nco}"
+		echo -ne " (1/2/3): ${nco}"
 		read st
 		case $st in
 			[1]* ) st=1;
@@ -146,7 +147,23 @@ tweak2backup(){
 			echo -e "${nco} 开始备份...${nco}";
 			echo;
 			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
+   			[3]* )
+			st=3;
+			debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
+			echo
+			echo -e "${nco} 以下是可备份插件列表,请输入序号进行备份:${nco}"
+			IFS=$'\n'
+			for i in $debs; do
+				num=$((num+1))
+				name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)  
+				echo "$num. $name"
+			done
+			IFS=$SAVEIFS
+			read -p "请输入序号:" num
+			pkg=${debs[$num-1]}
+			break
+			;;
+			* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
 		esac
 	done
 	if [ $st = 1 ]; then
