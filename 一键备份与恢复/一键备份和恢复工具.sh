@@ -154,6 +154,7 @@ tweak2backup(){
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 	fi
+ 	total_time=0
    	for pkg in $debs; do
     		start_time=$(date +%s)
     		num=$(($num+1))
@@ -250,7 +251,8 @@ tweak2backup(){
   		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
 		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
   		end_time=$(date +%s)
-		total_time=$((end_time-start_time))
+		current_time=$((end_time-start_time))
+		total_time=$(($total_time + $current_time))
 		if [ $total_time -lt 60 ]; then
 			echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
 		else
