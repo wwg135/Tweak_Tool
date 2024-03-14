@@ -226,7 +226,7 @@ tweak2backup(){
 		fi
 
 		echo
-  		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+  		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
 		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
 		echo -e "已成功备份 ${red}"$num"${nco} 个插件"
 		echo
