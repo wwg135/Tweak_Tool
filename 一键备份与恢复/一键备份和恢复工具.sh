@@ -162,9 +162,9 @@ tweak2backup(){
 		num=$((num+1))
 		name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)  
 		echo "$num. $name"
-		done
+	done
+ 	break
 	IFS=$SAVEIFS
- 	break;;
  	echo
 
    	for pkg in $debs; do
