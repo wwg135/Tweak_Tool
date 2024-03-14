@@ -208,7 +208,7 @@ tweak2backup(){
 		checkPremissions "$conffiles"
 		checkPremissions "$ldid"
 		checkPremissions "$crash_reporter"
-		echo "$postinst $preinst $postrm $prerm $extrainst_ $extrainst $control $triggers $conffiles $ldid $crash_reporter" | xargs -n1 -P8 rsync -a {} "$bak_dir/$name_$ver_$arc/DEBIAN/" 2> /dev/null
+		echo "$postinst $preinst $postrm $prerm $extrainst_ $extrainst $control $triggers $conffiles $ldid $crash_reporter" | xargs -n1 -P11 rsync -a {} "$bak_dir/$name_$ver_$arc/DEBIAN/" 2> /dev/null
 
 		SAVEIFS=$IFS
 		IFS=$'\n'
