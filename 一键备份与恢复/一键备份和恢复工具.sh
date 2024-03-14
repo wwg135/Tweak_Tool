@@ -160,7 +160,9 @@ tweak2backup(){
 			done
 			IFS=$SAVEIFS
 			read -p "请输入序号:" num
-      			selectdebs "${debs[$num-1]}"
+      			name=${debs[$num-1]} 
+	 		pkg=$(dpkg-query -s "$name" | grep ^Package)
+    			selectdebs "$pkg"
 			break
 			;;
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
@@ -393,7 +395,6 @@ selectdebs(){
 		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒"
 	fi
 	echo
-	done
 
 	clear
 	unset pkg
