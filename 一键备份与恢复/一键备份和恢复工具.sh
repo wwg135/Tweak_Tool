@@ -119,12 +119,12 @@ tweak2backup() {
         case $st in
             [1]* ) st=1;
             echo;
-            echo -e "${nco} 开始备份...${nco}";
+            echo -e "${nco} 开始备份，请耐心等待...${nco}";
             echo;
             break;;
             [2]* ) st=2;
             echo;
-            echo -e "${nco} 开始备份...${nco}";
+            echo -e "${nco} 开始备份，请耐心等待...${nco}";
             echo;
             break;;
             * ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
@@ -202,7 +202,7 @@ backup_and_pack() {
     fi
 
     echo
-    echo -e "${nco} 已成功备份 $pkg 个插件${nco}"
+    echo -e "${nco} 已成功备份插件： ${red}$name${red}"
     dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
     rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
     echo
