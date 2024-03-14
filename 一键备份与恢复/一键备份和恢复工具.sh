@@ -155,18 +155,6 @@ tweak2backup(){
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 	fi
  	total_time=0
-  	echo
-	echo -e "${nco}即将要备份的插件列表如下：${nco}"
- 	IFS=$'\n'	
-	for i in $debs; do	
-		num=$((num+1))	
-		name=`dpkg-query -s "$i" | grep Name | awk '{print $2}'`  	
-		echo "$num. $name"	
-	done	
-	IFS=$SAVEIFS
-  	echo
-
-	echo -e "${nco}开始备份...${nco}"
    	for pkg in $debs; do
     		start_time=$(date +%s)
     		num=$(($num+1))
