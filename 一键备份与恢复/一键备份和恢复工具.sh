@@ -358,12 +358,12 @@ selectdebs(){
 
 	SAVEIFS=$IFS
 	IFS=$'\n'
-	files=$(dpkg-query -L "$pkg"|sed "1 d")
-	for i in $files; do
-		if [ -d "$i" ]; then
-			mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
-		elif [ -f "$i" ]; then
-			cp -p "$i" "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
+	files=$(dpkg-query -L "$pkg")
+	for file in $files; do
+		if [ -d $file ]; then
+			mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc""
+		elif [ -f $file ]; then
+			cp -p "$i" "$bak_dir"/"$name"_"$ver"_"$arc""
 		fi
 	done
 	IFS=$SAVEIFS
