@@ -371,7 +371,12 @@ backup() {
 	fi
 
 	echo
-	new_dir="/var/mobile/backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
+ 	if [[ -f "/var/jb/.installed_dopamine" ]]; then
+    		jailbreak=$(cat "/var/jb/.installed_dopamine" | grep -o 'dopamine')
+	elif [[ -f "/var/jb/.installed_xina15" ]]; then
+    		jailbreak=$(cat "/var/jb/.installed_xina15" | grep -o 'xina15')
+	fi
+	new_dir="/var/mobile/$jailbreak_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
  	for file in ./*; do
      		if [[ $file == "./一键备份和恢复工具.sh" ]]; then
