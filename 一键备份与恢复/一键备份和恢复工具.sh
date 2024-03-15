@@ -160,27 +160,8 @@ tweak2backup(){
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 	elif [ $st = 3 ]; then
-   		debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
-  		IFS=$'\n'
-		num=0
-		for i in $debs; do
-			num=$((num+1))
-			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
-			echo "$num. $name"
-		done
-		IFS=$SAVEIFS
-		echo
-		for ((i=5; i>=0; i--)); do
-			echo -e "\r$i秒后开始返回上级菜单选择备份\c"
-			sleep 1
-		done
-
-  		clear
-  		yes '' | sed 2q
-    		echo
 		tweak3backup
 		echo
-  		exit
   	fi
 	total_time=0
    	for pkg in $debs; do
@@ -302,6 +283,7 @@ tweak3backup(){
 	yes '' | sed 2q
 	echo -e "${nco} 开始进行插件备份！${nco}"
 	debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
+ 	echo
    	for pkg in $debs; do
     		start_time=$(date +%s)
     		num=$(($num+1))
