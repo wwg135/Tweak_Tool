@@ -154,14 +154,23 @@ tweak2backup(){
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 	fi
- 	total_time=0
-   	for pkg in $debs; do
-    		start_time=$(date +%s)
-    		num=$(($num+1))
+
+  	thread_num=50
+	tempfifo=/var/tmp/$$.fifo
+	mkfifo $tempfifo
+	exec 5<>${tempfifo}
+	rm -rf ${tempfifo}
+	for((i=1;i<=$thread_num;i++))
+	do
+		echo ;
+	done >&5
+
+	for pkg in $debs; do
+	read -u5
+	{
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
   		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
-    		echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -173,66 +182,107 @@ tweak2backup(){
 			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
 		fi
 		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status >> "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
-  		if [ -d /var/jb/Library/dpkg/info ];then
-			postinst=/var/jb/Library/dpkg/info/"$pkg".postinst
-			preinst=/var/jb/Library/dpkg/info/"$pkg".preinst
-			postrm=/var/jb/Library/dpkg/info/"$pkg".postrm
-			prerm=/var/jb/Library/dpkg/info/"$pkg".prerm
-			extrainst_=/var/jb/Library/dpkg/info/"$pkg".extrainst_
-			extrainst=/var/jb/Library/dpkg/info/"$pkg".extrainst
-			control=/var/jb/Library/dpkg/info/"$pkg".control-e
-			triggers=/var/jb/Library/dpkg/info/"$pkg".triggers
-			conffiles=/var/jb/Library/dpkg/info/"$pkg".conffiles
-			ldid=/var/jb/Library/dpkg/info/"$pkg".ldid
-			crash_reporter=/var/jb/Library/dpkg/info/"$pkg".crash_reporter
+		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
+		if [ -d /var/jb/Library/dpkg/info ];then
+			path=/var/jb/Library/dpkg/info/
+			postinst="$pkg".postinst
+	  		ret=`checkPremissions $path $postinst`
+	  		route="${ret} ${route}"
+			preinst="$pkg".preinst
+	  		ret=`checkPremissions $path $preinst`
+	  		route="${ret} ${route}"
+			postrm="$pkg".postrm
+	  		ret=`checkPremissions $path $postrm`
+	  		route="${ret} ${route}"
+			prerm="$pkg".prerm
+	  		ret=`checkPremissions $path $prerm`
+	  		route="${ret} ${route}"
+			extrainst_="$pkg".extrainst_
+	  		ret=`checkPremissions $path $extrainst_`
+	  		route="${ret} ${route}"
+			extrainst="$pkg".extrainst
+	  		ret=`checkPremissions $path $extrainst`
+	  		route="${ret} ${route}"
+			control="$pkg".control-e
+	  		ret=`checkPremissions $path $control`
+	  		route="${ret} ${route}"
+			triggers="$pkg".triggers
+	  		ret=`checkPremissions $path $triggers`
+	  		route="${ret} ${route}"
+			conffiles="$pkg".conffiles
+	  		ret=`checkPremissions $path $conffiles`
+	  		route="${ret} ${route}"
+			ldid="$pkg".ldid
+	  		ret=`checkPremissions $path $ldid`
+	  		route="${ret} ${route}"
+	  		crash_reporter="$pkg".crash_reporter
+	  		ret=`checkPremissions $path $crash_reporter`
+	  		route="${ret} ${route}"
 		else
-			postinst=/var/lib/dpkg/info/"$pkg".postinst
-			preinst=/var/lib/dpkg/info/"$pkg".preinst
-			postrm=/var/lib/dpkg/info/"$pkg".postrm
-			prerm=/var/lib/dpkg/info/"$pkg".prerm
-			extrainst_=/var/lib/dpkg/info/"$pkg".extrainst_
-			extrainst=/var/lib/dpkg/info/"$pkg".extrainst
-			control=/var/lib/dpkg/info/"$pkg".control-e
-			triggers=/var/lib/dpkg/info/"$pkg".triggers
-			conffiles=/var/lib/dpkg/info/"$pkg".conffiles
-			ldid=/var/lib/dpkg/info/"$pkg".ldid
-			crash_reporter=/var/lib/dpkg/info/"$pkg".crash_reporter
+			path=/var/lib/dpkg/info/
+			postinst="$pkg".postinst
+	  		ret=`checkPremissions $path $postinst`
+	  		route="${ret} ${route}"
+			preinst="$pkg".preinst
+	  		ret=`checkPremissions $path $preinst`
+	  		route="${ret} ${route}"
+			postrm="$pkg".postrm
+	  		ret=`checkPremissions $path $postrm`
+	  		route="${ret} ${route}"
+			prerm="$pkg".prerm
+	  		ret=`checkPremissions $path $prerm`
+	  		route="${ret} ${route}"
+			extrainst_="$pkg".extrainst_
+	  		ret=`checkPremissions $path $extrainst_`
+	  		route="${ret} ${route}"
+			extrainst="$pkg".extrainst
+	  		ret=`checkPremissions $path $extrainst`
+	  		route="${ret} ${route}"
+			control="$pkg".control-e
+	  		ret=`checkPremissions $path $control`
+	  		route="${ret} ${route}"
+			triggers="$pkg".triggers
+	  		ret=`checkPremissions $path $triggers`
+	  		route="${ret} ${route}"
+			conffiles="$pkg".conffiles
+	  		ret=`checkPremissions $path $conffiles`
+	  		route="${ret} ${route}"
+			ldid="$pkg".ldid
+	  		ret=`checkPremissions $path $ldid`
+	  		route="${ret} ${route}"
+	  		crash_reporter="$pkg".crash_reporter
+	  		ret=`checkPremissions $path $crash_reporter`
+	  		route="${ret} ${route}"
 		fi
-		checkPremissions "$postinst"
-		checkPremissions "$preinst"
-		checkPremissions "$postrm"
-		checkPremissions "$prerm"
-		checkPremissions "$extrainst_"
-		checkPremissions "$extrainst"
-		checkPremissions "$control"
-		checkPremissions "$triggers"
-		checkPremissions "$conffiles"
-		checkPremissions "$ldid"
-		checkPremissions "$crash_reporter"
-		rsync -a "$postinst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/postinst 2> /dev/null
-		rsync -a "$preinst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/preinst 2> /dev/null
-		rsync -a "$postrm" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/postrm 2> /dev/null
-		rsync -a "$prerm" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/prerm 2> /dev/null
-		rsync -a "$extrainst_" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/extrainst_ 2> /dev/null
-		rsync -a "$extrainst" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/extrainst 2> /dev/null
-		rsync -a "$control" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/control-e 2> /dev/null
-		rsync -a "$triggers" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/triggers 2> /dev/null
-		rsync -a "$conffiles" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/conffiles 2> /dev/null
-		rsync -a "$ldid" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/ldid 2> /dev/null
-		rsync -a "$crash_reporter" "$bak_dir"/"$name""$ver""$arc"/DEBIAN/crash_reporter 2> /dev/null
+		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
+
+		cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/
+		mv -f $postinst postinst >/dev/null 2>&1 || true
+		mv -f $preinst preinst >/dev/null 2>&1 || true
+		mv -f $postrm postrm >/dev/null 2>&1 || true
+		mv -f $prerm prerm >/dev/null 2>&1 || true
+		mv -f $extrainst_ extrainst_ >/dev/null 2>&1 || true
+		mv -f $extrainst extrainst >/dev/null 2>&1 || true
+		mv -f $control control-e >/dev/null 2>&1 || true
+		mv -f $triggers triggers >/dev/null 2>&1 || true
+		mv -f $conffiles conffiles >/dev/null 2>&1 || true
+		mv -f $ldid ldid >/dev/null 2>&1 || true
+		mv -f $crash_reporter crash_reporter >/dev/null 2>&1 || true
 
 		SAVEIFS=$IFS
 		IFS=$'\n'
 		files=$(dpkg-query -L "$pkg"|sed "1 d")
+		route=""
 		for i in $files; do
-			if [ -d "$i" ]; then
-				mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
-			elif [ -f "$i" ]; then
-				cp -p "$i" "$bak_dir"/"$name"_"$ver"_"$arc"/"$i"
+			if [ -f "$i" ]; then
+				i=`echo ${i##*jb}`
+				i=$(echo $i|sed 'y/ /*/')
+				route=".${i} ${route}"
 			fi
 		done
 		IFS=$SAVEIFS
+		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb
+		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb ;tar xvfp -)
 
 		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
@@ -248,22 +298,16 @@ tweak2backup(){
 		fi
 
 		echo
-  		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
+		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
 		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
-  		end_time=$(date +%s)
-		current_time=$((end_time-start_time))
-		total_time=$(($total_time + $current_time))
-		if [ $total_time -lt 60 ]; then
-			echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
-		else
-			minutes=$((total_time/60))
-			seconds=$((total_time%60))
-			echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒"
-		fi
 		echo
+		echo "" >&5
+	} &
 	done
+	wait
+	exec 5>&-
 
-  	echo -e "${nco} 以上成功备份的插件列表如下：${nco}"
+	echo -e "${nco} 以上成功备份的插件列表如下：${nco}"
 	IFS=$'\n'
 	num=0
 	for i in $debs; do
