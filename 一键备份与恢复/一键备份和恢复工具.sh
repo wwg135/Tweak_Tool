@@ -151,34 +151,33 @@ tweak2backup(){
 			echo;
 			echo -e "${nco} 以下是插件列表：${nco}";
 			echo;
-			debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
-			IFS=$'\n'
-			num=0
-			for i in $debs; do
-				num=$((num+1))
-				name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
-				echo "$num. $name"
-			done
-			IFS=$SAVEIFS
-			echo
-			for ((i=5; i>=1; i--)); do
-				echo -e "\r$i秒后即将开始备份...\c"
-				sleep 1
-			done
-			echo;
-   			clear
-    			yes '' | sed 2q
-    			st=2
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 "${nco};
 		esac
 	done
 	if [ $st = 1 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
-	elif [ $st = 2 ]; then
+	elif [ $st = 2 ] || [ $st = 3 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 	fi
  	total_time=0
+	if [ $st = 3 ]; then
+  		IFS=$'\n'
+		num=0
+		for i in $debs; do
+			num=$((num+1))
+			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
+			echo "$num. $name"
+		done
+		IFS=$SAVEIFS
+		echo
+		for ((i=5; i>=1; i--)); do
+			echo -e "\r$i秒后即将开始备份...\c"
+			sleep 1
+		done
+		echo
+  	fi
+
    	for pkg in $debs; do
     		start_time=$(date +%s)
     		num=$(($num+1))
