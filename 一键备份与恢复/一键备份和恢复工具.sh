@@ -298,6 +298,8 @@ tweak2backup(){
 }
 
 tweak3backup(){
+	yes '' | sed 2q
+	echo -e "${nco} 开始进行插件备份！${nco}"
 	debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
    	for pkg in $debs; do
     		start_time=$(date +%s)
