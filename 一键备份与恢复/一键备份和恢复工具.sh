@@ -171,11 +171,11 @@ tweak2backup(){
   		echo
     
     		clear
-      		yes '' | sed 2q
 		for ((i=5; i>=1; i--)); do
     			echo -e "\r$i秒后开始返回上级菜单选择备份\c"
     			sleep 1
 		done
+  		yes '' | sed 2q
 		tweak2backup
 		echo
 	fi
