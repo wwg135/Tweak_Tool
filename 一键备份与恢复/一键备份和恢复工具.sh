@@ -162,6 +162,7 @@ tweak2backup(){
   	elif [ $st = 3 ]; then
    		debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
      		IFS=$'\n'
+       		num=0
 		for i in $debs; do
 			num=$((num+1))
 			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
