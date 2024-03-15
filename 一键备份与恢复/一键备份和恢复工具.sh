@@ -318,8 +318,8 @@ tweak2backup(){
 
 setting2backup(){
 	echo -e "${nco} 正在进行配置备份，请耐心等待...${nco}"
-	cp -a /var/jb/User/Library ./"$tweaksetting_dir"/ 2> /dev/null
-	cp -a /var/jb/etc/apt/sources.list.d ./"$sources_dir"/ 2> /dev/null
+	cp -a /var/jb/User/Library /var/mobile/tweak_tool/"$tweaksetting_dir"/ 2> /dev/null
+	cp -a /var/jb/etc/apt/sources.list.d /var/mobile/tweak_tool/"$sources_dir"/ 2> /dev/null
 	
 	clear
 	yes '' | sed 2q
@@ -455,10 +455,10 @@ recover(){
 		echo
 		echo -e "${nco} 准备中,开始安装插件${nco}"
 		echo
-		if [ -d ./"$bak_dir" -a "`ls -A ./"$bak_dir"`" != "" ]; then
+		if [ -d /var/mobile/tweak_tool/"$bak_dir" -a "`ls -A /var/mobile/tweak_tool/"$bak_dir"`" != "" ]; then
 			echo -e "${nco} 正在安装插件，请耐心等待...${nco}"
 			sleep 4s
-			dpkg -i ./"$bak_dir"/*.deb
+			dpkg -i /var/mobile/tweak_tool/"$bak_dir"/*.deb
 			echo -e "${nco} 插件安装完成${nco}"
 		else
 			echo -e "${nco} 没有找到备份的插件，即将跳过...${nco}"
@@ -473,8 +473,8 @@ recover(){
 		sleep 2s
 		echo
 		echo -e "${nco} 开始恢复插件设置${nco}"
-		cp -a ./"$tweaksetting_dir"/* /var/jb/User/
-		cp -a ./"$sources_dir"/* /var/jb/etc/apt/
+		cp -a /var/mobile/tweak_tool/"$tweaksetting_dir"/* /var/jb/User/
+		cp -a /var/mobile/tweak_tool/"$sources_dir"/* /var/jb/etc/apt/
 		chown mobile:staff /var/jb/User/Library/Preferences
 		echo -e "${nco} 插件设置恢复成功${nco}"
 
