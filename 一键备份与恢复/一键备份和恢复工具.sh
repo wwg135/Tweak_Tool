@@ -28,12 +28,15 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 checkPremissions(){
-    if [ -e $1 ]; then
-		f_p=`stat -c %a $1`
+	f=$1$2
+	if [ -e $f ]; then
+		f_p=`stat -c %a $f`
 		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
-			chmod 755 $1
+			chmod 755 $f
 		fi
-    fi
+		echo $2
+	fi
+	echo ""
 }
 
 _check_dpkg_run(){
@@ -72,7 +75,6 @@ _run(){
 
 dpkgfill(){
 	_command="${0##*/}"
-	date >>/tmp/000
 	shopt -s expand_aliases 2>>/dev/null
 	if which lecho 2>>/dev/null 1>>/dev/null; then
 		if [ -n "${LANG}" ]; then
