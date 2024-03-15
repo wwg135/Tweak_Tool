@@ -256,7 +256,7 @@ tweak2backup(){
 	  		ret=`checkPremissions $path $crash_reporter`
 	  		route="${ret} ${route}"
 		fi
-		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
+		(cd $path ;tar cpf - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN ;tar xpf -)
 
 		cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/
 		mv -f $postinst postinst >/dev/null 2>&1 || true
@@ -284,7 +284,7 @@ tweak2backup(){
 		done
 		IFS=$SAVEIFS
 		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb
-		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb ;tar xvfp -)
+		(cd /var/jb/ ;tar cpf - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb ;tar xpf -)
 
 		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
