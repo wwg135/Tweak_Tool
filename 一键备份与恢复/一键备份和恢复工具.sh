@@ -170,6 +170,7 @@ tweak2backup(){
 	{
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
+  		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -180,8 +181,8 @@ tweak2backup(){
 			rm -f /var/lib/dpkg/info/"$pkg".list
 			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
 		fi
-		mkdir -p "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/control
+		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
+		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
 		if [ -d /var/jb/Library/dpkg/info ];then
 			path=/var/jb/Library/dpkg/info/
 			postinst="$pkg".postinst
@@ -253,9 +254,9 @@ tweak2backup(){
 	  		ret=`checkPremissions $path $crash_reporter`
 	  		route="${ret} ${route}"
 		fi
-		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
+		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
 
-		cd "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/
+		cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/
 		mv -f $postinst postinst >/dev/null 2>&1 || true
 		mv -f $preinst preinst >/dev/null 2>&1 || true
 		mv -f $postrm postrm >/dev/null 2>&1 || true
@@ -280,10 +281,10 @@ tweak2backup(){
 			fi
 		done
 		IFS=$SAVEIFS
-		mkdir -p "$bak_dir"/"$pkg"_"$ver"_"$arc"/var/jb
-		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$pkg"_"$ver"_"$arc"/var/jb ;tar xvfp -)
+		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb
+		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb ;tar xvfp -)
 
-		rootdir="$bak_dir"/"$pkg"_"$ver"_"$arc"
+		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			if [ -d "$rootdir"/var/jb ]; then
 				mkdir -p "$rootdir"/temp
@@ -297,8 +298,8 @@ tweak2backup(){
 		fi
 
 		echo
-		dpkg-deb -b "$bak_dir"/"$pkg"_"$ver"_"$arc" 2>&1
-		rm -rf "$bak_dir"/"$pkg"_"$ver"_"$arc" 2>&1
+		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
 		echo
 		echo "" >&5
 	} &
@@ -406,7 +407,7 @@ backup() {
 	fi
 	new_dir="/var/mobile/${jailbreak}_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
- 	for file in ./*; do
+ 	for file in /var/mobile/tweak_tool/*; do
      		if [[ $file == "./一键备份和恢复工具.sh" ]]; then
        			cp "$file" "$new_dir/"
      		else
