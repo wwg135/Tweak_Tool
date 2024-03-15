@@ -180,6 +180,7 @@ tweak2backup(){
     		echo
 		tweak3backup
 		echo
+  		exit
   	fi
 	total_time=0
    	for pkg in $debs; do
