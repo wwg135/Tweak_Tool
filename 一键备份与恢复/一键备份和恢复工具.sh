@@ -149,7 +149,7 @@ tweak2backup(){
 			break;;
    			[3]* ) st=3;
 			echo;
-			echo -e "${nco} 开始备份...${nco}";
+			echo -e "${nco} 以下是插件列表：${nco}";
 			echo;
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 "${nco};
@@ -172,6 +172,10 @@ tweak2backup(){
     
     		clear
       		yes '' | sed 2q
+		for ((i=5; i>=1; i--)); do
+    			echo -e "\r$i秒后开始返回上级菜单选择备份\c"
+    			sleep 1
+		done
 		tweak2backup
 		echo
 	fi
