@@ -131,10 +131,9 @@ tweak2backup(){
 	echo
 	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
 	echo -e " [2] - ${nco}备份插件过滤系统依赖${nco}"
- 	echo -e " [3] - ${nco}查看${red}备份插件过滤系统依赖${nco}的插件列表${nco}"
 	echo
 	while true; do
-		echo -ne " (1/2/3): ${nco}"
+		echo -ne " (1/2): ${nco}"
 		read st
 		case $st in
 			[1]* ) st=1;
@@ -144,42 +143,32 @@ tweak2backup(){
 			break;;
 			[2]* ) st=2;
 			echo;
-			echo -e "${nco} 开始备份...${nco}";
-			echo;
-			break;;
-   			[3]* ) st=3;
-			echo;
 			echo -e "${nco} 以下是插件列表：${nco}";
 			echo;
+			debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
+			IFS=$'\n'
+			num=0
+			for i in $debs; do
+				num=$((num+1))
+				name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
+				echo "$num. $name"
+			done
+			IFS=$SAVEIFS
+			echo
+			for ((i=5; i>=1; i--)); do
+				echo -e "\r$i秒后即将开始备份...\c"
+				sleep 1
+			done
+			echo;
 			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 或 3 "${nco};
+			* ) echo -e ${red}" 请输入 1 或 2 "${nco};
 		esac
 	done
 	if [ $st = 1 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
-  	elif [ $st = 3 ]; then
-   		debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
-     		IFS=$'\n'
-       		num=0
-		for i in $debs; do
-			num=$((num+1))
-			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
-			echo "$num. $name"
-		done
-		IFS=$SAVEIFS
-  		echo
-		for ((i=5; i>=1; i--)); do
-    			echo -e "\r$i秒后开始返回上级菜单选择备份\c"
-    			sleep 1
-		done
-
-  		clear
-  		yes '' | sed 2q
-		tweak2backup
-		echo
-	fi
+  	fi
  	total_time=0
    	for pkg in $debs; do
     		start_time=$(date +%s)
