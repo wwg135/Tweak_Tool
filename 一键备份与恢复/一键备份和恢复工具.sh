@@ -263,6 +263,7 @@ tweak2backup(){
 		echo
 	done
 
+	echo -e "${nco} 以上成功备份的插件列表如下：${nco}"
 	IFS=$'\n'
 	num=0
 	for i in $debs; do
