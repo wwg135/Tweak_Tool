@@ -403,9 +403,9 @@ backup() {
 
 	echo
  	if [[ -f "/var/jb/.installed_dopamine" ]]; then
-    		jailbreak="dopamine"
+    		jailbreak="dp"
 	elif [[ -f "/var/jb/.installed_xina15" ]]; then
-    		jailbreak="xina15"
+    		jailbreak="x2"
 	fi
 	new_dir="/var/mobile/${jailbreak}_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
