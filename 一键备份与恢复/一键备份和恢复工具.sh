@@ -371,7 +371,11 @@ backup() {
 	fi
 
 	echo
- 	jailbreak=$(cat /var/jb/.installed_dopamine /var/jb/.installed_xina15 2>/dev/null | grep -Eo 'dopamine|xina15' | head -n1)
+ 	if [[ -f "/var/jb/.installed_dopamine" ]]; then
+    		jailbreak="dopamine"
+	elif [[ -f "/var/jb/.installed_xina15" ]]; then
+    		jailbreak="xina15"
+	fi
 	new_dir="/var/mobile/${jailbreak}_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
  	for file in ./*; do
