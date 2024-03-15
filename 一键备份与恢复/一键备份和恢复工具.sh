@@ -422,7 +422,13 @@ backup() {
 	end_time=$(date +%s)
 	total_time_initial=$((end_time-start_time))
 	total_time_total=$((total_time_initial + plugins_time + settings_time))
-	echo -e "${nco} 备份流程已结束，耗时：${red}"$total_time_total" ${nco}秒，感谢耐心等待！${nco}"
+	if ((total_time_total >= 60)); then
+		minutes=$((total_time_total / 60))
+		seconds=$((total_time_total % 60))
+		echo -e "${nco} 备份流程已结束，耗时：${red}$minutes ${nco}分 ${red}$seconds ${nco}秒，感谢耐心等待！${nco}"
+	else
+		echo -e "${nco} 备份流程已结束，耗时：${red}$total_time_total ${nco}秒，感谢耐心等待！${nco}"
+	fi
  	echo
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
 	echo
