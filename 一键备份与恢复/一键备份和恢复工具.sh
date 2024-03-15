@@ -169,12 +169,12 @@ tweak2backup(){
 		done
 		IFS=$SAVEIFS
   		echo
-    
-    		clear
 		for ((i=5; i>=1; i--)); do
     			echo -e "\r$i秒后开始返回上级菜单选择备份\c"
     			sleep 1
 		done
+
+  		clear
   		yes '' | sed 2q
 		tweak2backup
 		echo
