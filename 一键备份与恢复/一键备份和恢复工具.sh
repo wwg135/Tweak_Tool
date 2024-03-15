@@ -307,21 +307,6 @@ tweak2backup(){
 	wait
 	exec 5>&-
 
-	echo -e "${nco} 以上成功备份的插件列表如下：${nco}"
-	IFS=$'\n'
-	num=0
-	for i in $debs; do
-		num=$((num+1))
-		name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
-		echo "$num. $name"
-	done
-	IFS=$SAVEIFS
-	echo
-	for ((i=5; i>=0; i--)); do
-		echo -e "\r$i秒后进行配置备份...\c"
-		sleep 1
-	done
-
 	clear
 	unset pkg
 	yes '' | sed 2q
