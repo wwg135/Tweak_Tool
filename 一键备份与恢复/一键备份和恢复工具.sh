@@ -154,6 +154,7 @@ tweak2backup(){
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
   	fi
+	debslist "$debs"
 	total_time=0
    	for pkg in $debs; do
     		start_time=$(date +%s)
@@ -161,21 +162,6 @@ tweak2backup(){
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
   		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
-    		echo -e "${nco} 即将备份的插件列表如下：${nco}"
-		IFS=$'\n'
-		num=0
-		for i in $debs; do
-			num=$((num+1))
-			name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
-			echo "$num. $name"
-		done
-		IFS=$SAVEIFS
-		echo
-		for ((i=5; i>=0; i--)); do
-		echo -e "\r$i秒后进行插件备份...\c"
-		sleep 1
-		done
- 		echo
     		echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
@@ -285,6 +271,25 @@ tweak2backup(){
 	echo
 }
 
+debslist() {
+	debs=$1
+	echo -e "${nco} 即将备份的插件列表如下：${nco}"
+	IFS=$'\n'
+	num=0
+	for i in $debs; do
+		num=$((num+1))
+		name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
+		echo "$num. $name"
+	done
+	IFS=$SAVEIFS
+	echo
+	for ((i=5; i>=0; i--)); do
+		echo -e "\r$i秒后进行插件备份...\c"
+		sleep 1
+	done
+ 	echo
+}
+   
 setting2backup(){
 	echo -e "${nco} 正在进行配置备份，请耐心等待...${nco}"
 	cp -a /var/jb/User/Library ./"$tweaksetting_dir"/ 2> /dev/null
