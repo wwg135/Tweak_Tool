@@ -372,7 +372,7 @@ backup() {
 
 	echo
  	jailbreak=$(cat /var/jb/.installed_dopamine /var/jb/.installed_xina15 2>/dev/null | grep -Eo 'dopamine|xina15' | head -n1)
-	new_dir="/var/mobile/$jailbreak_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
+	new_dir="/var/mobile/${jailbreak}_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
 	mkdir $new_dir
  	for file in ./*; do
      		if [[ $file == "./一键备份和恢复工具.sh" ]]; then
