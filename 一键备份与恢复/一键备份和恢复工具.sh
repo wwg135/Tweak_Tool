@@ -159,9 +159,8 @@ tweak2backup(){
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
 	elif [ $st = 2 ] || [ $st = 3 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
-	fi
- 	total_time=0
-	if [ $st = 3 ]; then
+	elif [ $st = 3 ]; then
+   		debs=$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1)
   		IFS=$'\n'
 		num=0
 		for i in $debs; do
@@ -171,13 +170,18 @@ tweak2backup(){
 		done
 		IFS=$SAVEIFS
 		echo
-		for ((i=5; i>=1; i--)); do
-			echo -e "\r$i秒后即将开始备份...\c"
+		for ((i=5; i>=0; i--)); do
+			echo -e "\r$i秒后开始返回上级菜单选择备份\c"
 			sleep 1
 		done
+
+  		clear
+  		yes '' | sed 2q
+    		echo
+		tweak2backup
 		echo
   	fi
-
+	total_time=0
    	for pkg in $debs; do
     		start_time=$(date +%s)
     		num=$(($num+1))
