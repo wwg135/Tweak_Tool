@@ -8,9 +8,9 @@ red="\033[38;5;196m"
 nco="\033[0m" #no color
 num=0
 
-bak_dir=./插件备份
-tweaksetting_dir=./插件配置备份
-sources_dir=./源地址备份
+bak_dir=/var/mobile/tweak_tool/插件备份
+tweaksetting_dir=/var/mobile/tweak_tool/插件配置备份
+sources_dir=/var/mobile/tweak_tool/源地址备份
 
 mkd(){
     if [ ! -e $1 ]; then
