@@ -154,7 +154,6 @@ tweak2backup(){
 	elif [ $st = 2 ]; then
 		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
   	fi
-	debslist "$debs"
 	total_time=0
    	for pkg in $debs; do
     		start_time=$(date +%s)
@@ -263,17 +262,8 @@ tweak2backup(){
 		fi
 		echo
 	done
- 	
-	clear
-	unset pkg
-	yes '' | sed 2q
-	echo -e "${nco} DONE！插件备份完成！${nco}"
-	echo
-}
 
-debslist() {
-	debs=$1
-	echo -e "${nco} 即将备份的插件列表如下：${nco}"
+	echo -e "${nco} 以上成功备份的插件列表如下：${nco}"
 	IFS=$'\n'
 	num=0
 	for i in $debs; do
@@ -284,12 +274,17 @@ debslist() {
 	IFS=$SAVEIFS
 	echo
 	for ((i=5; i>=0; i--)); do
-		echo -e "\r$i秒后进行插件备份...\c"
+		echo -e "\r$i秒后进行配置备份...\c"
 		sleep 1
 	done
- 	echo
+ 	
+	clear
+	unset pkg
+	yes '' | sed 2q
+	echo -e "${nco} DONE！插件备份完成！${nco}"
+	echo
 }
-   
+
 setting2backup(){
 	echo -e "${nco} 正在进行配置备份，请耐心等待...${nco}"
 	cp -a /var/jb/User/Library ./"$tweaksetting_dir"/ 2> /dev/null
