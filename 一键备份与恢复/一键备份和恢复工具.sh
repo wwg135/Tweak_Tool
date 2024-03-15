@@ -170,7 +170,6 @@ tweak2backup(){
 	{
 		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
 		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
-  		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
 			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
@@ -181,8 +180,8 @@ tweak2backup(){
 			rm -f /var/lib/dpkg/info/"$pkg".list
 			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
 		fi
-		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
+		mkdir -p "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN
+		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/control
 		if [ -d /var/jb/Library/dpkg/info ];then
 			path=/var/jb/Library/dpkg/info/
 			postinst="$pkg".postinst
@@ -254,9 +253,9 @@ tweak2backup(){
 	  		ret=`checkPremissions $path $crash_reporter`
 	  		route="${ret} ${route}"
 		fi
-		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
+		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
 
-		cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/
+		cd "$bak_dir"/"$pkg"_"$ver"_"$arc"/DEBIAN/
 		mv -f $postinst postinst >/dev/null 2>&1 || true
 		mv -f $preinst preinst >/dev/null 2>&1 || true
 		mv -f $postrm postrm >/dev/null 2>&1 || true
@@ -281,10 +280,10 @@ tweak2backup(){
 			fi
 		done
 		IFS=$SAVEIFS
-		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb
-		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb ;tar xvfp -)
+		mkdir -p "$bak_dir"/"$pkg"_"$ver"_"$arc"/var/jb
+		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$pkg"_"$ver"_"$arc"/var/jb ;tar xvfp -)
 
-		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
+		rootdir="$bak_dir"/"$pkg"_"$ver"_"$arc"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			if [ -d "$rootdir"/var/jb ]; then
 				mkdir -p "$rootdir"/temp
@@ -298,8 +297,8 @@ tweak2backup(){
 		fi
 
 		echo
-		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
-		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+		dpkg-deb -b "$bak_dir"/"$pkg"_"$ver"_"$arc" 2>&1
+		rm -rf "$bak_dir"/"$pkg"_"$ver"_"$arc" 2>&1
 		echo
 		echo "" >&5
 	} &
@@ -420,13 +419,7 @@ backup() {
 	end_time=$(date +%s)
 	total_time_initial=$((end_time-start_time))
 	total_time_total=$((total_time_initial + plugins_time + settings_time))
- 	if [ $total_time -lt 60 ]; then
-		echo -e "${nco} 备份流程已结束，耗时：${red}"$total_time_total" ${nco}秒，感谢耐心等待！${nco}"
-  	else
-		minutes=$((total_time_total/60))
-		seconds=$((total_time_total%60))
-		echo -e "${nco} 备份流程已结束，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒，感谢耐心等待！${nco}"
-	fi
+	echo -e "${nco} 备份流程已结束，耗时：${red}"$total_time_total" ${nco}秒，感谢耐心等待！${nco}"
  	echo
 	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
 	echo
