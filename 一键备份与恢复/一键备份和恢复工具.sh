@@ -309,6 +309,18 @@ tweak2backup(){
 	wait
 	exec 5>&-
 
+ 	echo
+  	num=0
+  	for pkg in $debs; do
+    		num=$((num+1))
+	done
+  	echo -e "已成功备份 ${red}"$num"${nco} 个插件"
+   	echo
+	for ((i=5; i>=0; i--)); do
+		echo -e "\r$i秒后进行配置备份...\c"
+		sleep 1
+	done
+
 	clear
 	unset pkg
 	yes '' | sed 2q
