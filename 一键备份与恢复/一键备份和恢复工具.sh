@@ -314,10 +314,19 @@ tweak2backup(){
   	for pkg in $debs; do
     		num=$((num+1))
 	done
-  	echo -e "已成功备份 ${red}"$num"${nco} 个插件"
+  	echo -e "已成功备份 ${red}"$num"${nco} 个插件，如下列表："
    	echo
+	IFS=$'\n'
+	num=0
+	for i in $debs; do
+		num=$((num+1))
+		name=$(dpkg-query -s "$i" | grep "Name:" | cut -d' ' -f2)    
+		echo "$num. $name"
+	done
+	IFS=$SAVEIFS
+	echo
 	for ((i=5; i>=0; i--)); do
-		echo -e "\r$i秒后进行配置备份...\c"
+		echo -e "\r${red}$i${nco}秒后进行配置备份...\c"
 		sleep 1
 	done
 
