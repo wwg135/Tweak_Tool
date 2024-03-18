@@ -5,6 +5,7 @@ export LANG=en_US.UTF-8
 
 # colors
 red="\033[38;5;196m"
+blu="\033[38;5;39m"
 nco="\033[0m" #no color
 num=0
 
