@@ -523,8 +523,6 @@ recover(){
 }
 
 fixupPermissions(){
-	success=false
-
 	if [ -e "/var/tmp" ]; then
 		if [ "$(stat -c "%U:%G" /var/tmp)" != "root:root" ]; then
 			chown 0:0 /var/tmp
@@ -591,9 +589,6 @@ fixupPermissions(){
   			echo -e "\r${red}$i${nco}秒后自动返回开始菜单...\c"
   			sleep 1
   		done
-  
-  		echo
-  		clear
   		main
   	fi
 }
