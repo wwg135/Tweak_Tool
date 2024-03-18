@@ -575,22 +575,15 @@ fixupPermissions(){
 		echo "/var/tmp/com.apple.appstored不存在"
 	fi
 
-	if [[ "$(stat -c "%U:%G" /var/tmp)" == "root:root" ]] &&
-		[[ "$(stat -c "%a" /var/tmp)" == "777" ]] &&
-		[[ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" == "501:root" ]] &&
-		[[ "$(stat -c "%a" /var/tmp/com.apple.appstored)" == "700" ]]; then
-		success=true
-	fi
+  	echo -e "${nco} 已成功修复商店无法下载的问题,感谢耐心等待!${nco}"
+  	echo
+  	for ((i=5; i>=0; i--)); do
+  	echo -e "\r${red}$i${nco}秒后自动返回开始菜单...\c"
+  		sleep 1
+  	done
 
-  	if [ $success = true ]; then
-  		echo -e "${nco} 已成功修复商店无法下载的问题,感谢耐心等待!${nco}"
-  		echo
-  		for ((i=5; i>=0; i--)); do
-  			echo -e "\r${red}$i${nco}秒后自动返回开始菜单...\c"
-  			sleep 1
-  		done
-  		main
-  	fi
+   	clear
+  	main
 }
 
 main(){
