@@ -575,6 +575,7 @@ fixupPermissions(){
 		echo "/var/tmp/com.apple.appstored不存在"
 	fi
 
+	echo
   	echo -e "${nco} 已成功修复商店无法下载的问题,感谢耐心等待!${nco}"
   	echo
   	for ((i=5; i>=0; i--)); do
