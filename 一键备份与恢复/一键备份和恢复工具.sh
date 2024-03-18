@@ -27,16 +27,13 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-checkPremissions(){
-	f=$1$2
-	if [ -e $f ]; then
-		f_p=`stat -c %a $f`
+check_premissions(){
+    if [ -e $1 ]; then
+		f_p=`stat -c %a $1`
 		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
-			chmod 755 $f
+			chmod 755 $1
 		fi
-		echo $2
-	fi
-	echo ""
+    fi
 }
 
 _check_dpkg_run(){
