@@ -523,60 +523,12 @@ recover(){
 }
 
 fixupPermissions(){
-    	success=false
+	chown 0:0 /var/tmp
+        chmod 777 /var/tmp  
+        chown 501:0 /var/tmp/com.apple.appstored
+        chmod 700 /var/tmp/com.apple.appstored
 
-	if [ "$(stat -c "%a" /var/tmp)" != "root:root" ]; then
-        	chown 0:0 /var/tmp
-  		retry="chown 0:0 /var/tmp" 
-  		while [ "$(stat -c "%U:%G" /var/tmp)" != "root:root" ]; do
-    			$retry
-    			echo "修改/var/tmp的所有者失败,重试..." 
-  		done
-  		echo "修改/var/tmp的所有者成功!"
-    	else
-        	echo "权限正确，无需修改/var/tmp的所有者权限"
-    	fi
-
-
- 	if [ "$(stat -c "%a" /var/tmp)" != "777" ]; then
-        	chmod 777 /var/tmp  
-  		retry="chmod 777 /var/tmp"
-  		while [ "$(stat -c "%a" /var/tmp)" != "777" ]; do
-    			$retry 
-    			echo "修改/var/tmp的权限失败,重试..."
-  		done
-  		echo "修改/var/tmp的权限成功!"
-    	else
-        	echo "权限正确，无需修改/var/tmp的权限"
-    	fi
-
-	if [ "$(stat -c "%a" /var/tmp)" != "501:root" ]; then
-        	chown 501:0 /var/tmp/com.apple.appstored
-  		retry="chown 501:0 /var/tmp/com.apple.appstored"
-  		while [ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" != "501:root" ]; do
-    			$retry
-    			echo "修改/var/tmp/com.apple.appstored的所有者失败,重试..." 
-  		done
-  		echo "修改/var/tmp/com.apple.appstored的所有者成功!"
-    	else
-        	echo "权限正确，无需修改/var/tmp/com.apple.appstored的权限"
-    	fi
-
-	if [ "$(stat -c "%a" /var/tmp)" != "700" ]; then
-        	chmod 700 /var/tmp/com.apple.appstored
-  		retry="chmod 700 /var/tmp/com.apple.appstored"
-  		while [ "$(stat -c "%a" /var/tmp/com.apple.appstored)" != "700" ]; do
-    			$retry
-    			echo "修改/var/tmp/com.apple.appstored的权限失败,重试..."
-  		done
-    	else
-        	echo "权限正确，无需修改/var/tmp/com.apple.appstored的权限"
-    	fi
-
-  	if [[ "$(stat -c "%U:%G" /var/tmp)" == "root:root" ]] &&
-     		[[ "$(stat -c "%a" /var/tmp)" == "777" ]] &&
-     		[[ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" == "501:root" ]] &&
-     		[[ "$(stat -c "%a" /var/tmp/com.apple.appstored)" == "700" ]]; then
+  	if [[ "$(stat -c "%U:%G" /var/tmp)" == "root:root" ]] && [[ "$(stat -c "%a" /var/tmp)" == "777" ]] && [[ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" == "501:root" ]] && [[ "$(stat -c "%a" /var/tmp/com.apple.appstored)" == "700" ]]; then
      		success=true
   	fi
 
