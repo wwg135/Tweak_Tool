@@ -522,6 +522,108 @@ recover(){
 	fi
 }
 
+fixupPermissions(){
+    	success=false
+
+  	chown 0:0 /var/tmp
+  	retry="chown 0:0 /var/tmp" 
+  	while [ "$(stat -c "%U:%G" /var/tmp)" != "root:root" ]; do
+    		$retry
+    		echo "修改/var/tmp的所有者失败,重试..." 
+  	done
+  	echo "修改/var/tmp的所有者成功!"
+
+  	chmod 777 /var/tmp  
+  	retry="chmod 777 /var/tmp"
+  	while [ "$(stat -c "%a" /var/tmp)" != "777" ]; do
+    		$retry 
+    		echo "修改/var/tmp的权限失败,重试..."
+  	done
+  	echo "修改/var/tmp的权限成功!"
+
+  	chown 501:0 /var/tmp/com.apple.appstored
+  	retry="chown 501:0 /var/tmp/com.apple.appstored"
+  	while [ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" != "501:root" ]; do
+    		$retry
+    		echo "修改/var/tmp/com.apple.appstored的所有者失败,重试..." 
+  	done
+  	echo "修改/var/tmp/com.apple.appstored的所有者成功!"
+
+  	chmod 700 /var/tmp/com.apple.appstored
+  	retry="chmod 700 /var/tmp/com.apple.appstored"
+  	while [ "$(stat -c "%a" /var/tmp/com.apple.appstored)" != "700" ]; do
+    		$retry
+    		echo "修改/var/tmp/com.apple.appstored的权限失败,重试..."
+  	done
+
+  	if [[ "$(stat -c "%U:%G" /var/tmp)" == "root:root" ]] &&
+     		[[ "$(stat -c "%a" /var/tmp)" == "777" ]] &&
+     		[[ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" == "501:root" ]] &&
+     		[[ "$(stat -c "%a" /var/tmp/com.apple.appstored)" == "700" ]]; then
+     		success=true
+  	fi
+
+  	if [ $success = true ]; then
+  		echo -e "${nco} 已成功修复商店无法下载的问题,感谢耐心等待!${nco}"
+  		echo
+  		for ((i=5; i>=0; i--)); do
+  			echo -e "\r${red}$i${nco}秒后自动返回开始菜单...\c"
+  			sleep 1
+  		done
+  
+  		echo
+  		clear
+  		main
+  	fi
+}
+
+main(){
+	echo
+	echo -e "${nco} 欢迎使用一键备份和恢复工具${nco}"
+	echo -e "${nco} 本工具由预言小猫优化整合，由M哥修改${nco}"
+	echo -e "${nco} 鸣谢：菠萝 & 建哥${nco}"
+	echo
+	echo -e "${nco} 请选择对应功能${nco}"
+	echo -e " [1] - ${nco}一键备份所有插件和配置${nco}"
+	echo -e " [2] - ${nco}一键安装所有插件并恢复配置${nco}"
+	echo -e " [3] - ${nco}修复App Store无法下载${nco}"
+	echo -e " [q] - ${nco}退出工具${nco}"
+	echo
+	while true; do
+		echo -ne " (1/2/3/q): ${nco}"
+		read st
+		case $st in
+			[1]* ) st=1;
+			break;;
+			[2]* ) st=2;
+			break;;
+  			[3]* ) st=3;
+    			break;;
+			[Qq]* ) st=q;
+			break;;
+			* ) echo -e ${red}" 请输入 1 或 2 或3 或 q ！"${nco};
+		esac
+	done
+
+	if [ $st = 1 ]; then
+		clear
+		backup
+	elif [ $st = 2 ]; then
+		clear
+		recover
+	elif [ $st = 3 ]; then
+		clear
+		fixupPermissions
+	else
+		clear
+		yes '' | sed 2q
+		echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+		echo
+		exit
+	fi
+}
+
+
 echo
 echo -e "${nco} 欢迎使用一键备份和恢复工具${nco}"
 echo -e "${nco} 本工具由预言小猫优化整合，由M哥修改${nco}"
@@ -530,19 +632,22 @@ echo
 echo -e "${nco} 请选择对应功能${nco}"
 echo -e " [1] - ${nco}一键备份所有插件和配置${nco}"
 echo -e " [2] - ${nco}一键安装所有插件并恢复配置${nco}"
+echo -e " [3] - ${nco}修复App Store无法下载${nco}"
 echo -e " [q] - ${nco}退出工具${nco}"
 echo
 while true; do
-	echo -ne " (1/2/q): ${nco}"
+	echo -ne " (1/2/3/q): ${nco}"
 	read st
 	case $st in
 		[1]* ) st=1;
 		break;;
 		[2]* ) st=2;
 		break;;
+  		[3]* ) st=3;
+    		break;;
 		[Qq]* ) st=q;
 		break;;
-		* ) echo -e ${red}" 请输入 1 或 2 或 q ！"${nco};
+		* ) echo -e ${red}" 请输入 1 或 2 或3 或 q ！"${nco};
 	esac
 done
 
@@ -552,6 +657,9 @@ if [ $st = 1 ]; then
 elif [ $st = 2 ]; then
 	clear
 	recover
+elif [ $st = 3 ]; then
+	clear
+	fixupPermissions
 else
 	clear
 	yes '' | sed 2q
