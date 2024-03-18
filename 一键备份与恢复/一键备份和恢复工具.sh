@@ -408,7 +408,7 @@ backup() {
 	mkdir $new_dir
  	for file in /var/mobile/tweak_tool/*; do
      		if [[ $file == "/var/mobile/tweak_tool/一键备份和恢复工具.sh" ]]; then
-       			cp "$file" "$new_dir/"
+       			continue
      		else
        			mv "$file" "$new_dir/"
      		fi
