@@ -523,14 +523,66 @@ recover(){
 }
 
 fixupPermissions(){
-	chown 0:0 /var/tmp
-        chmod 777 /var/tmp  
-        chown 501:0 /var/tmp/com.apple.appstored
-        chmod 700 /var/tmp/com.apple.appstored
+	success=false
 
-  	if [[ "$(stat -c "%U:%G" /var/tmp)" == "root:root" ]] && [[ "$(stat -c "%a" /var/tmp)" == "777" ]] && [[ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" == "501:root" ]] && [[ "$(stat -c "%a" /var/tmp/com.apple.appstored)" == "700" ]]; then
-     		success=true
-  	fi
+	if [ -e "/var/tmp" ]; then
+		if [ "$(stat -c "%U:%G" /var/tmp)" != "root:root" ]; then
+			chown 0:0 /var/tmp
+			if [ $? -eq 0 ]; then
+				echo "修改/var/tmp的所有者成功!"
+			else
+				echo "修改/var/tmp的所有者失败"
+			fi
+		else
+			echo "权限正确，无需修改/var/tmp的所有者权限"
+		fi
+
+		if [ "$(stat -c "%a" /var/tmp)" != "777" ]; then
+			chmod 777 /var/tmp
+			if [ $? -eq 0 ]; then
+				echo "修改/var/tmp的权限成功!"
+			else
+				echo "修改/var/tmp的权限失败"
+			fi
+		else
+			echo "权限正确，无需修改/var/tmp的权限"
+		fi
+	else
+		echo "/var/tmp不存在"
+	fi
+
+	if [ -e "/var/tmp/com.apple.appstored" ]; then
+		if [ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" != "501:root" ]; then
+			chown 501:0 /var/tmp/com.apple.appstored
+			if [ $? -eq 0 ]; then
+				echo "修改/var/tmp/com.apple.appstored的所有者成功!"
+			else
+				echo "修改/var/tmp/com.apple.appstored的所有者失败"
+			fi
+		else
+			echo "权限正确，无需修改/var/tmp/com.apple.appstored的权限"
+		fi
+
+		if [ "$(stat -c "%a" /var/tmp/com.apple.appstored)" != "700" ]; then
+			chmod 700 /var/tmp/com.apple.appstored
+			if [ $? -eq 0 ]; then
+				echo "修改/var/tmp/com.apple.appstored的权限成功!"
+			else
+				echo "修改/var/tmp/com.apple.appstored的权限失败"
+			fi
+		else
+			echo "权限正确，无需修改/var/tmp/com.apple.appstored的权限"
+		fi
+	else
+		echo "/var/tmp/com.apple.appstored不存在"
+	fi
+
+	if [[ "$(stat -c "%U:%G" /var/tmp)" == "root:root" ]] &&
+		[[ "$(stat -c "%a" /var/tmp)" == "777" ]] &&
+		[[ "$(stat -c "%U:%G" /var/tmp/com.apple.appstored)" == "501:root" ]] &&
+		[[ "$(stat -c "%a" /var/tmp/com.apple.appstored)" == "700" ]]; then
+		success=true
+	fi
 
   	if [ $success = true ]; then
   		echo -e "${nco} 已成功修复商店无法下载的问题,感谢耐心等待!${nco}"
