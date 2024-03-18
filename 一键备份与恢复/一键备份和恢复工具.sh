@@ -253,7 +253,7 @@ tweak2backup(){
 
 			echo
   			dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
-			rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+			rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
   			end_time=$(date +%s)
 			current_time=$((end_time-start_time))
 			total_time=$(($total_time + $current_time))
