@@ -9,6 +9,8 @@ blu="\033[38;5;39m"
 nco="\033[0m" #no color
 num=0
 
+base_dir=/var/mobile//tweak_tool
+
 bak_dir=/var/mobile/tweak_tool/插件备份
 tweaksetting_dir=/var/mobile/tweak_tool/插件配置备份
 sources_dir=/var/mobile/tweak_tool/源地址备份
@@ -255,7 +257,16 @@ tweak_backup(){
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
 		esac
 	done
-	
+	current_time=$(date "+%Y-%m-%d_%H:%M:%S")
+	bak_dir="$base_dir"/"备份_""$current_time"
+	tweak_dir="$bak_dir"/插件备份
+	tweaksetting_dir="$bak_dir"/插件配置备份
+	sources_dir="$bak_dir"/源地址备份
+	mkd $tweak_dir
+	mkd $tweaksetting_dir
+	mkd $sources_dir
+	chown -R 501:501 $bak_dir 2> /dev/null
+ 
 	if [ $st = 3 ]; then
 		clear
 		yes '' | sed 2q
@@ -386,31 +397,25 @@ backup() {
 	if [ $st = 1 ]; then
 		yes '' | sed 2q
 		echo -e "${nco} 开始进行配置备份！${nco}"
-		start_time_settings=$(date +%s)
 		echo
+		if [ -z $bak_dir ]; then
+			current_time=$(date "+%Y-%m-%d_%H:%M:%S")
+			bak_dir="$base_dir"/"备份_""$current_time"
+			tweak_dir="$bak_dir"/插件备份
+			tweaksetting_dir="$bak_dir"/插件配置备份
+			sources_dir="$bak_dir"/源地址备份
+			mkd $tweak_dir
+			mkd $tweaksetting_dir
+			mkd $sources_dir
+			chown -R 501:501 $bak_dir 2> /dev/null
+		fi
 		setting_backup
-		end_time_settings=$(date +%s)
-		settings_time=$((end_time_settings-start_time_settings))
 	else
 		clear
 		yes '' | sed 2q
 		echo -e "${nco} 已跳过配置备份！${nco}"
 		echo
 	fi
-
-	echo
-	new_dir="/var/mobile/备份_$(date "+%Y-%m-%d_%H:%M:%S")"
-	mkdir $new_dir
- 	chown -R 501:501 $new_dir 2> /dev/null
- 	for file in /var/mobile/tweak_tool/*; do
-     		if [[ $file == "/var/mobile/tweak_tool/一键备份和恢复工具.sh" ]]; then
-       			continue
-     		else
-       			mv "$file" "$new_dir/"
-     		fi
-   	done
-   	echo -e "${nco}新备份文件：${red}$new_dir"
-	echo
 
 	end_time=$(date +%s)
 	total_time_initial=$((end_time-start_time))
@@ -449,9 +454,14 @@ recover(){
 
 	if [ $st = 1 ]; then
 		echo
+  		if [[ -f "/var/jb/.installed_dopamine" ]]; then
+    			jailbreak="dp"
+		elif [[ -f "/var/jb/.installed_xina15" ]]; then
+    			jailbreak="x2"
+		fi
 		echo -e "${nco} 请选择需要恢复的备份！${nco}"
-		bakendnumber=`j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j: $i;j=$[j+1];done|tail -1|awk -F ": " '{print $1}'`
-		j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$i")";j=$[j+1];done
+		bakendnumber=`j=1;for i in $(ls -l /var/mobile/ | grep -E "${jailbreak}备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j: $i;j=$[j+1];done|tail -1|awk -F ": " '{print $1}'`
+		j=1;for i in $(ls -l /var/mobile/ | grep -E "${jailbreak}备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$i")";j=$[j+1];done
 		while true; do
 			echo -e "${nco} 请输入备份对应的序号 ${blu}[1-$bakendnumber]${blu}${nco} :${nco} \c"
 			read bakNum
@@ -460,17 +470,21 @@ recover(){
 				echo -e ${red}" 请勿输入除数字以外的字符！"${nco}
 				;;
 				*)
-				bakendnumber=`j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
+				bakendnumber=`j=1;for i in $(ls -l /var/mobile/ | grep -E "${jailbreak}备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
 				if [[ "$bakNum" -gt "$bakendnumber" ]]; then
 					echo -e ${red}" 备份序号必须在 [1-$bakendnumber] 之间！"${nco}
 					continue
 				else
-					bak=`j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo $j: $i;j=$[j+1];done | grep -e "$bakNum:" | head -1 |awk -F ": " '{print $2}'`
+					bak=`j=1;for i in $(ls -l /var/mobile/ | grep -E "${jailbreak}备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo $j: $i;j=$[j+1];done | grep -e "$bakNum:" | head -1 |awk -F ": " '{print $2}'`
 				fi
 				break
 				;;
 			esac	
 		done
+  		bak_dir="$base_dir"/"$bak"
+		tweak_dir="$bak_dir"/插件备份
+		tweaksetting_dir="$bak_dir"/插件配置备份
+		sources_dir="$bak_dir"/源地址备份
 		
 		yes '' | sed 2q
 		echo -e "${nco} 开始进行恢复，请勿退出！${nco}"
@@ -478,10 +492,10 @@ recover(){
 		echo
 		echo -e "${nco} 准备中，开始安装插件${nco}"
 		echo
-		if [ -d "$bak_dir" -a "`ls -A "$bak_dir"`" != "" ]; then
+		if [ -d $tweak_dir -a "`ls -A $tweak_dir`" != "" ]; then
 			echo -e "${nco} 正在安装插件，请耐心等待...${nco}"
 			sleep 4s
-			dpkg -i "$bak_dir"/*.deb
+			dpkg -i $tweak_dir/*.deb
 			echo
 			echo -e "${nco} 插件安装完成${nco}"
 		else
