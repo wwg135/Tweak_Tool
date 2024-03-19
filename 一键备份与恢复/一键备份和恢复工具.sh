@@ -9,11 +9,7 @@ blu="\033[38;5;39m"
 nco="\033[0m" #no color
 num=0
 
-base_dir=/var/mobile//tweak_tool
-
-bak_dir=/var/mobile/tweak_tool/插件备份
-tweaksetting_dir=/var/mobile/tweak_tool/插件配置备份
-sources_dir=/var/mobile/tweak_tool/源地址备份
+base_dir=/var/mobile/tweak_tool
 
 mkd(){
     if [ ! -e $1 ]; then
@@ -342,14 +338,6 @@ setting_backup(){
 
 backup() {
 	start_time=$(date +%s)
-	if [ -d "$bak_dir" ] || [ -d "$tweaksetting_dir" ] || [ -d "$sources_dir" ]; then
-    		rm -rf "$bak_dir" "$tweaksetting_dir" "$sources_dir"
-	fi
-
-	mkd $bak_dir
-	mkd $tweaksetting_dir
-	mkd $sources_dir
-	
 	echo
 	echo -e "${nco} 根据数据大小，备份可能需要5-10分钟甚至更久，请预留充足时间...${nco}"
 	echo -e "${nco} 开始备份后请耐心等待，保持界面不要退出！${nco}"
