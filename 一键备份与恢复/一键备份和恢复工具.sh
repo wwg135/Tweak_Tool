@@ -37,42 +37,42 @@ check_premissions(){
     fi
 }
 
-_check_dpkg_run(){
-	_wait=1
+check_dpkg_run(){
+	wait=1
 	while [ '1' -le '2' ]; do
-		_check="$(ps -ef | grep dpkg | grep -v grep | grep -v "$$" | grep -v "sudo ${0##*/}" | wc -l)"
-		if [ "${_check}" -ge '1' ]; then
-			_wait="$((_wait+1))"
+		check="$(ps -ef | grep dpkg | grep -v grep | grep -v "$$" | grep -v "sudo ${0##*/}" | wc -l)"
+		if [ "${check}" -ge '1' ]; then
+			wait="$((wait+1))"
 			sleep 1
 		else
 			break
 		fi
 	done
-	unset _check _wait
+	unset check wait
 }
 
-_run(){
-	if [ -n "${_package_row}" ]; then
-		case "${_lack}" in
+run(){
+	if [ -n "${package_row}" ]; then
+		case "${lack}" in
 			description)
-				_fill="Description: An awesome MobileSubstrate tweak"\!
+				fill="Description: An awesome MobileSubstrate tweak"\!
 			;;
 			maintainer)
-				_fill="Maintainer: someone"
+				fill="Maintainer: someone"
 			;;
 			*)
 				break
 			;;
 		esac
-		if [ -n "${_fill}" ]; then
-			sed -i.tmp "${_package_row}a ${_fill}" "${_stash_file}"
+		if [ -n "${fill}" ]; then
+			sed -i.tmp "${package_row}a ${fill}" "${stash_file}"
 		fi
 	fi
-	unset _package _package_row _lack _fill
+	unset package package_row lack fill
 }
 
-dpkgfill(){
-	_command="${0##*/}"
+dpkg_fill(){
+	command="${0##*/}"
 	shopt -s expand_aliases 2>>/dev/null
 	if which lecho 2>>/dev/null 1>>/dev/null; then
 		if [ -n "${LANG}" ]; then
@@ -81,46 +81,46 @@ dpkgfill(){
 			alias lecho="lecho -c ${0##*/}"
 		fi
 	fi
-	unset _check
+	unset check
 
-	_check_dpkg_run
+	check_dpkg_run
 	i='0'
 	i_max="$(dpkg -S / 2>&1 | grep -E 'escription|aintainer' | wc -l)"
 	if [ "${i_max}" -eq '0' ]; then
 		echo -e "${nco} 没有发现错误${nco}";
 	else
-		_stash_file_0="$(dpkg -S / 2>&1)"
-		_stash_file_0="${_stash_file_0#*\'}"
-		_stash_file_0="${_stash_file_0%%\'*}"
-		if [ -z "$(echo "${_stash_file_0}" | grep '/')" ]; then
-			_stash_file='/var/lib/dpkg/status'
+		stash_file_0="$(dpkg -S / 2>&1)"
+		stash_file_0="${stash_file_0#*\'}"
+		stash_file_0="${stash_file_0%%\'*}"
+		if [ -z "$(echo "${stash_file_0}" | grep '/')" ]; then
+			stash_file='/var/lib/dpkg/status'
 		else
-			_stash_file="${_stash_file_0}"
+			stash_file="${stash_file_0}"
 		fi
-		unset _stash_file_0
+		unset stash_file_0
 		while [ "${i}" -le "${i_max}" ]; do
 			case "$(dpkg -S / 2>&1 | grep -E 'warning|escription|aintainer' | sed -n 2p)" in
 				*escription*)
-					_lack='description'
+					lack='description'
 					;;
 				*aintainer*)
-					_lack='maintainer'
+					lack='maintainer'
 					;;
 				*)
 					break
 					;;
 			esac
-			_package="$(dpkg -S / 2>&1 | grep -E 'warning|escription|aintainer' | sed -n 1p)"
-			_package="${_package%\'*}"
-			_package="${_package##*\'}"
-			_package_row="$(sed -n "/^Package: ${_package}$/=" "${_stash_file}")"
-			_check_dpkg_run
-			_run
+			package="$(dpkg -S / 2>&1 | grep -E 'warning|escription|aintainer' | sed -n 1p)"
+			package="${package%\'*}"
+			package="${package##*\'}"
+			package_row="$(sed -n "/^Package: ${package}$/=" "${stash_file}")"
+			check_dpkg_run
+			run
 			i="$((i+1))"
 		done
 		echo -e "${nco} 已修补包缺失信息${nco}";
 	fi
-	rm -f "${_stash_file}.tmp"
+	rm -f "${stash_file}.tmp"
 	rm -rf "/tmp/dpkg-fill"
 	tweak_backup
 }
@@ -261,9 +261,7 @@ tweak_backup(){
 		yes '' | sed 2q
 		pkgendnumber=`j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
 		printf  " ${nco}已安装的插件数量: %-24s\n" "$pkgendnumber"
-		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do
-  		name=`dpkg-query -s "$i" | grep Name | awk '{print $2}'`
-    		echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$name")";j=$[j+1];done
+		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$i")";j=$[j+1];done
 		while true; do
 			echo -e "${nco} 请输入插件对应的序号 ${blu}[1-$pkgendnumber]${blu}${nco} 以空格分隔，按回车键结束输入:${nco} \c"
 			read pkgNums
@@ -401,12 +399,7 @@ backup() {
 	fi
 
 	echo
- 	if [[ -f /var/jb/.installed_dopamine ]]; then
-    		jailbreak="dp"
-	elif [[ -f /var/jb/.installed_xina15 ]]; then
-    		jailbreak="x2"
-	fi
-	new_dir="/var/mobile/${jailbreak}备份_$(date "+%Y-%m-%d_%H:%M:%S")"
+	new_dir="/var/mobile/备份_$(date "+%Y-%m-%d_%H:%M:%S")"
 	mkdir $new_dir
  	chown -R 501:501 $new_dir 2> /dev/null
  	for file in /var/mobile/tweak_tool/*; do
@@ -446,50 +439,100 @@ recover(){
 		echo -ne " (1/2): ${nco}"
 		read st
 		case $st in
-			[1]* ) st=1;
+			[1] ) st=1;
 			break;;
-			[2]* ) st=2;
+			[2] ) st=2;
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
 		esac
 	done
 
 	if [ $st = 1 ]; then
+		echo
+		echo -e "${nco} 请选择需要恢复的备份！${nco}"
+		bakendnumber=`j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j: $i;j=$[j+1];done|tail -1|awk -F ": " '{print $1}'`
+		j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$i")";j=$[j+1];done
+		while true; do
+			echo -e "${nco} 请输入备份对应的序号 ${blu}[1-$bakendnumber]${blu}${nco} :${nco} \c"
+			read bakNum
+			case $bakNum in
+				''|*[!0-9]*)
+				echo -e ${red}" 请勿输入除数字以外的字符！"${nco}
+				;;
+				*)
+				bakendnumber=`j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
+				if [[ "$bakNum" -gt "$bakendnumber" ]]; then
+					echo -e ${red}" 备份序号必须在 [1-$bakendnumber] 之间！"${nco}
+					continue
+				else
+					bak=`j=1;for i in $(ls -l /var/mobile/ | grep -E "备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo $j: $i;j=$[j+1];done | grep -e "$bakNum:" | head -1 |awk -F ": " '{print $2}'`
+				fi
+				break
+				;;
+			esac	
+		done
+		
 		yes '' | sed 2q
-		echo -e "${nco} 开始进行恢复！${nco}"
+		echo -e "${nco} 开始进行恢复，请勿退出！${nco}"
 		sleep 1s
 		echo
-		echo -e "${nco} 准备中,开始安装插件${nco}"
+		echo -e "${nco} 准备中，开始安装插件${nco}"
 		echo
 		if [ -d "$bak_dir" -a "`ls -A "$bak_dir"`" != "" ]; then
 			echo -e "${nco} 正在安装插件，请耐心等待...${nco}"
 			sleep 4s
 			dpkg -i "$bak_dir"/*.deb
+			echo
 			echo -e "${nco} 插件安装完成${nco}"
 		else
 			echo -e "${nco} 没有找到备份的插件，即将跳过...${nco}"
 		fi
 
-		sleep 2s
+ 		sleep 2s
 		echo
-		echo -e "${nco} 开始创建插件目录${nco}"
-		mkd /var/jb/User/Library/Preferences
-		echo -e "${nco} 目录创建成功${nco}"
+		echo -e "${nco} 开始恢复插件配置${nco}"
+		cp -a "$tweaksetting_dir"/* /var/jb/User/ 2> /dev/null
+		chown -R 501:501 /var/jb/User/Library/
+		chmod -R 0755 /var/jb/User/Library/
+		cp -a "$sources_dir"/* /var/jb/etc/apt/ 2> /dev/null
+		chown -R 0:0 /var/jb/etc/apt/sources.list.d/
+		chmod -R 0755 /var/jb/etc/apt/sources.list.d/
+		echo -e "${nco} 插件配置恢复成功${nco}"
 
-		sleep 2s
+		sleep 5s
 		echo
-		echo -e "${nco} 开始恢复插件设置${nco}"
-		cp -a "$tweaksetting_dir"/* /var/jb/User/
-		cp -a "$sources_dir"/* /var/jb/etc/apt/
-		chown mobile:staff /var/jb/User/Library/Preferences
-		echo -e "${nco} 插件设置恢复成功${nco}"
-
-		sleep 2s
+		echo -e "${nco} 恢复流程已结束，部分插件及设置可能需要注销设备或者重启用户空间后生效！${nco}"
 		echo
-		echo -e "${nco} 恢复流程已结束，即将注销生效，请稍等...${nco}"
-		sleep 1s
-		killall -9 backboardd
-		killall -9 SpringBoard
+		echo -e " [1] - ${nco}注销设备${nco}"
+		echo -e " [2] - ${nco}重启用户空间${nco}"
+		echo -e " [3] - ${nco}稍后再说${nco}"
+		echo
+		while true; do
+			echo -ne " (1/2/3): ${nco}"
+			read st
+			case $st in
+				[1] ) st=1;
+				break;;
+				[2] ) st=2;
+				break;;
+				[3] ) st=3;
+				break;;
+				* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
+			esac
+		done
+		if [ $st = 1 ]; then
+			sleep 2s
+			killall -9 backboardd
+		elif [ $st = 2 ]; then
+			sleep 2s
+			launchctl reboot userspace
+		else
+			clear
+			yes '' | sed 2q
+			echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+			echo
+			exit
+		fi
 		EOF
 	else
 		clear
