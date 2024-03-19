@@ -261,9 +261,7 @@ tweak_backup(){
 		yes '' | sed 2q
 		pkgendnumber=`j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
 		printf  " ${nco}已安装的插件数量: %-24s\n" "$pkgendnumber"
-		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do
-  		name=`dpkg-query -s "$i" | grep Name | awk '{print $2}'`
-  		echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$name")";j=$[j+1];done
+		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do name=`dpkg-query -s "$i" | grep Name | awk '{print $2}'` echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$name")";j=$[j+1];done
 		while true; do
 			echo -e "${nco} 请输入插件对应的序号 ${blu}[1-$pkgendnumber]${blu}${nco} 以空格分隔，按回车键结束输入:${nco} \c"
 			read pkgNums
@@ -574,7 +572,7 @@ main(){
 	echo -e "${nco} 请选择对应功能${nco}"
 	echo -e " [1] - ${nco}一键备份所有插件和配置${nco}"
 	echo -e " [2] - ${nco}一键安装所有插件并恢复配置${nco}"
-	echo -e " [3] - ${nco}修复App Store无法下载${nco}"
+	echo -e " [3] - ${nco}一键修复App Store无法下载${nco}"
 	echo -e " [q] - ${nco}退出工具${nco}"
 	echo
 	while true; do
