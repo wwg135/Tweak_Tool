@@ -406,8 +406,9 @@ backup() {
 	elif [[ -f /var/jb/.installed_xina15 ]]; then
     		jailbreak="x2"
 	fi
-	new_dir="/var/mobile/${jailbreak}_backup_$(TZ=UTC-8 date +'%Y.%m.%d_%H.%M.%S')"
+	new_dir="/var/mobile/${jailbreak}备份_$(date "+%Y-%m-%d_%H:%M:%S")"
 	mkdir $new_dir
+ 	chown -R 501:501 $new_dir 2> /dev/null
  	for file in /var/mobile/tweak_tool/*; do
      		if [[ $file == "/var/mobile/tweak_tool/一键备份和恢复工具.sh" ]]; then
        			continue
