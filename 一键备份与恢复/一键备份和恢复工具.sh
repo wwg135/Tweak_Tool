@@ -345,9 +345,9 @@ backup() {
 		echo -ne " (1/2): ${nco}"
 		read st
 		case $st in
-			[1]* ) st=1;
+			[1] ) st=1;
 			break;;
-			[2]* ) st=2;
+			[2] ) st=2;
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
 		esac
@@ -375,9 +375,9 @@ backup() {
 		echo -ne " (1/2): ${nco}"
 		read st
 		case $st in
-			[1]* ) st=1;
+			[1] ) st=1;
 			break;;
-			[2]* ) st=2;
+			[2] ) st=2;
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
 		esac
@@ -616,22 +616,22 @@ main(){
 	echo -e "${nco} 鸣谢：菠萝 & 建哥${nco}"
 	echo
 	echo -e "${nco} 请选择对应功能${nco}"
-	echo -e " [1] - ${nco}一键备份所有插件和配置${nco}"
-	echo -e " [2] - ${nco}一键安装所有插件并恢复配置${nco}"
-	echo -e " [3] - ${nco}一键修复App Store无法下载${nco}"
-	echo -e " [q] - ${nco}退出工具${nco}"
+	echo -e " [1] - ${nco}备份${nco}"
+	echo -e " [2] - ${nco}恢复${nco}"
+	echo -e " [3] - ${nco}修复（商店无法下载应用）${nco}"
+	echo -e " [q] - ${nco}退出${nco}"
 	echo
 	while true; do
 		echo -ne " (1/2/3/q): ${nco}"
 		read st
 		case $st in
-			[1]* ) st=1;
+			[1] ) st=1;
 			break;;
-			[2]* ) st=2;
+			[2] ) st=2;
 			break;;
-  			[3]* ) st=3;
+  			[3] ) st=3;
     			break;;
-			[Qq]* ) st=q;
+			[Qq] ) st=q;
 			break;;
 			* ) echo -e ${red}" 请输入 1 或 2 或3 或 q ！"${nco};
 		esac
@@ -662,22 +662,22 @@ echo -e "${nco} 本工具由预言小猫优化整合，由M哥修改${nco}"
 echo -e "${nco} 鸣谢：菠萝 & 建哥${nco}"
 echo
 echo -e "${nco} 请选择对应功能${nco}"
-echo -e " [1] - ${nco}一键备份所有插件和配置${nco}"
-echo -e " [2] - ${nco}一键安装所有插件并恢复配置${nco}"
-echo -e " [3] - ${nco}一键修复App Store无法下载${nco}"
-echo -e " [q] - ${nco}退出工具${nco}"
+echo -e " [1] - ${nco}备份${nco}"
+echo -e " [2] - ${nco}恢复${nco}"
+echo -e " [3] - ${nco}修复（商店无法下载应用）${nco}"
+echo -e " [q] - ${nco}退出${nco}"
 echo
 while true; do
 	echo -ne " (1/2/3/q): ${nco}"
 	read st
 	case $st in
-		[1]* ) st=1;
+		[1] ) st=1;
 		break;;
-		[2]* ) st=2;
+		[2] ) st=2;
 		break;;
-  		[3]* ) st=3;
+  		[3] ) st=3;
     		break;;
-		[Qq]* ) st=q;
+		[Qq] ) st=q;
 		break;;
 		* ) echo -e ${red}" 请输入 1 或 2 或3 或 q ！"${nco};
 	esac
