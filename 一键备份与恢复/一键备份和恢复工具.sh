@@ -275,12 +275,6 @@ deb_pack(){
 	done
 	wait
 	exec 5>&-
-
- 	clear
-	unset pkg
-	yes '' | sed 2q
-	echo -e "${nco} DONE！插件备份完成！${nco}"
-	echo
 }
 
 tweak_backup(){
