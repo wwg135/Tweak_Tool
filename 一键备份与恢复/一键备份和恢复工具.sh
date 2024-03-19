@@ -150,8 +150,9 @@ deb_pack(){
 			rm -f /var/lib/dpkg/info/"$pkg".list
 			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
 		fi
-		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status>>"$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/control
+  		rootdir="$tweak_dir"/"$name"_"$ver"_"$arc"
+		mkdir -p "$rootdir"/DEBIAN
+		dpkg-query -s "$pkg" | grep -v Status>>"$rootdir"/DEBIAN/control
 		if [ -d /var/jb/Library/dpkg/info ];then
 			path=/var/jb/Library/dpkg/info/
 			postinst="$pkg".postinst
@@ -223,9 +224,9 @@ deb_pack(){
 	  		ret=`checkPremissions $path $crash_reporter`
 	  		route="${ret} ${route}"
 		fi
-		(cd $path ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN ;tar xvfp -)
+		(cd $path ;tar cvfp - $route ) | (cd "$rootdir"/DEBIAN ;tar xvfp -)
 
-		cd "$bak_dir"/"$name"_"$ver"_"$arc"/DEBIAN/
+		cd "$rootdir"/DEBIAN/
 		mv -f $postinst postinst >/dev/null 2>&1 || true
 		mv -f $preinst preinst >/dev/null 2>&1 || true
 		mv -f $postrm postrm >/dev/null 2>&1 || true
@@ -250,10 +251,9 @@ deb_pack(){
 			fi
 		done
 		IFS=$SAVEIFS
-		mkdir -p "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb
-		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$bak_dir"/"$name"_"$ver"_"$arc"/var/jb ;tar xvfp -)
+		mkdir -p "$rootdir"/var/jb
+		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$rootdir"/var/jb ;tar xvfp -)
 
-		rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			if [ -d "$rootdir"/var/jb ]; then
 				mkdir -p "$rootdir"/temp
@@ -267,8 +267,8 @@ deb_pack(){
 		fi
 
 		echo
-		dpkg-deb -b "$bak_dir"/"$name"_"$ver"_"$arc" >/dev/null 2>&1
-		rm -rf "$bak_dir"/"$name"_"$ver"_"$arc" 2>&1
+		dpkg-deb -b "$rootdir" >/dev/null 2>&1
+		rm -rf "$rootdir" 2>&1
 		echo
 		echo "" >&5
 	} &
