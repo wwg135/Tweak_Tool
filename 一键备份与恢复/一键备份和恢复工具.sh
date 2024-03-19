@@ -126,7 +126,9 @@ dpkgfill(){
 }
 
 deb_pack(){
-	total_time=0
+	if [ -z "$total_time" ]; then
+    		total_time=0
+  	fi
 	start_time=$(date +%s)
 	num=$(($num+1))
 	ver=`dpkg-query -s "$1" | grep Version | awk '{print $2}'`
@@ -221,9 +223,7 @@ deb_pack(){
 	echo
 	dpkg-deb -b "$rootdir" >/dev/null 2>&1
 	rm -rf "$rootdir" 2>&1
- 	end_time=$(date +%s)
-	current_time=$((end_time-start_time))
-	total_time=$(($total_time + $current_time))
+	total_time=$((total_time + $(date +%s) - start_time))
 	if [ $total_time -lt 60 ]; then
 		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
 	else
