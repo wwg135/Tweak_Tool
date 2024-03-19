@@ -143,7 +143,7 @@ deb_pack(){
 		rm -f /var/lib/dpkg/info/"$1".list
 		mv -f /var/lib/dpkg/info/"$1".list.nonvar /var/lib/dpkg/info/"$1".list
 	fi
-	rootdir="$bak_dir"/"$name"_"$ver"_"$arc"
+	rootdir="$tweak_dir"/"$name"_"$ver"_"$arc"
 	mkdir -p "$rootdir"/DEBIAN
 	dpkg-query -s "$1" | grep -v Status>>"$rootdir"/DEBIAN/control
 	if [ -d /var/jb/Library/dpkg/info ];then
