@@ -9,7 +9,7 @@ blu="\033[38;5;39m"
 nco="\033[0m" #no color
 num=0
 
-base_dir=/var/mobile/tweak_tool
+base_dir=/var/mobile
 
 mkd(){
     if [ ! -e $1 ]; then
