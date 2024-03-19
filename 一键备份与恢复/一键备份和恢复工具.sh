@@ -313,7 +313,7 @@ tweak_backup(){
 	echo
 }
 
-setting2backup(){
+setting_backup(){
 	echo -e "${nco} 正在进行配置备份，请耐心等待...${nco}"
 	cp -a /var/jb/User/Library "$tweaksetting_dir"/ 2> /dev/null
 	cp -a /var/jb/etc/apt/sources.list.d "$sources_dir"/ 2> /dev/null
@@ -358,7 +358,7 @@ backup() {
 		echo -e "${nco} 开始检查包完整性！${nco}"
 		start_time_plugins=$(date +%s)
 		echo
-		dpkgfill
+		dpkg_fill
 		end_time_plugins=$(date +%s)
 		plugins_time=$((end_time_plugins-start_time_plugins))
 	else
@@ -388,7 +388,7 @@ backup() {
 		echo -e "${nco} 开始进行配置备份！${nco}"
 		start_time_settings=$(date +%s)
 		echo
-		setting2backup
+		setting_backup
 		end_time_settings=$(date +%s)
 		settings_time=$((end_time_settings-start_time_settings))
 	else
