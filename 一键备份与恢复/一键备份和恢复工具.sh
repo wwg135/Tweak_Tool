@@ -257,8 +257,13 @@ tweak_backup(){
 			* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
 		esac
 	done
+ 	if [[ -f "/var/jb/.installed_dopamine" ]]; then
+    		jailbreak="dp"
+	elif [[ -f "/var/jb/.installed_xina15" ]]; then
+    		jailbreak="x2"
+	fi
 	current_time=$(date "+%Y-%m-%d_%H:%M:%S")
-	bak_dir="$base_dir"/"备份_""$current_time"
+	bak_dir="$base_dir"/"${jailbreak}备份_""$current_time"
 	tweak_dir="$bak_dir"/插件备份
 	tweaksetting_dir="$bak_dir"/插件配置备份
 	sources_dir="$bak_dir"/源地址备份
