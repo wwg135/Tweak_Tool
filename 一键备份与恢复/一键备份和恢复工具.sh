@@ -618,7 +618,7 @@ echo
 echo -e "${nco} 请选择对应功能${nco}"
 echo -e " [1] - ${nco}一键备份所有插件和配置${nco}"
 echo -e " [2] - ${nco}一键安装所有插件并恢复配置${nco}"
-echo -e " [3] - ${nco}修复App Store无法下载${nco}"
+echo -e " [3] - ${nco}一键修复App Store无法下载${nco}"
 echo -e " [q] - ${nco}退出工具${nco}"
 echo
 while true; do
