@@ -539,7 +539,7 @@ recover(){
 		echo
 		if [ -d $tweak_dir -a "`ls -A $tweak_dir`" != "" ]; then
 			echo -e "${nco} 正在安装插件，请耐心等待...${nco}"
-			sleep 4s
+			sleep 1s
 			dpkg -i $tweak_dir/*.deb
 			echo
 			echo -e "${nco} 插件安装完成${nco}"
@@ -580,10 +580,10 @@ recover(){
 			esac
 		done
 		if [ $st = 1 ]; then
-			sleep 2s
+			sleep 1s
 			killall -9 backboardd
 		elif [ $st = 2 ]; then
-			sleep 2s
+			sleep 1s
 			launchctl reboot userspace
 		else
 			clear
@@ -659,61 +659,13 @@ fixupPermissions(){
 	echo
   	echo -e "${nco} 已成功修复商店无法下载的问题,感谢耐心等待!${nco}"
   	echo
-  	for ((i=5; i>=0; i--)); do
-  	echo -e "\r${red}$i${nco}秒后自动返回开始菜单...\c"
-  		sleep 1
-  	done
 
-   	clear
-  	main
+  	clear
+	yes '' | sed 2q
+	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+	echo
+	exit
 }
-
-main(){
-	echo
-	echo -e "${nco} 欢迎使用一键备份和恢复工具${nco}"
-	echo -e "${nco} 本工具由预言小猫优化整合，由M哥修改${nco}"
-	echo -e "${nco} 鸣谢：菠萝 & 建哥${nco}"
-	echo
-	echo -e "${nco} 请选择对应功能${nco}"
-	echo -e " [1] - ${nco}备份${nco}"
-	echo -e " [2] - ${nco}恢复${nco}"
-	echo -e " [3] - ${nco}修复（商店无法下载应用）${nco}"
-	echo -e " [q] - ${nco}退出${nco}"
-	echo
-	while true; do
-		echo -ne " (1/2/3/q): ${nco}"
-		read st
-		case $st in
-			[1] ) st=1;
-			break;;
-			[2] ) st=2;
-			break;;
-  			[3] ) st=3;
-    			break;;
-			[Qq] ) st=q;
-			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 或3 或 q ！"${nco};
-		esac
-	done
-
-	if [ $st = 1 ]; then
-		clear
-		backup
-	elif [ $st = 2 ]; then
-		clear
-		recover
-	elif [ $st = 3 ]; then
-		clear
-		fixupPermissions
-	else
-		clear
-		yes '' | sed 2q
-		echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
-		echo
-		exit
-	fi
-}
-
 
 echo
 echo -e "${nco} 欢迎使用一键备份和恢复工具${nco}"
