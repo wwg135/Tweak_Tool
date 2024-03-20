@@ -224,7 +224,7 @@ deb_pack(){
 	  		ret=`check_premissions $path $crash_reporter`
 	  		route="${ret} ${route}"
 		fi
-		(cd $path ; tar cjzf - --threads=0 --compress-program=xz -C / $route) | \ (cd "$rootdir"/DEBIAN ; tar xjfz - --decompress-program=xz --threads=0)
+		(cd $path ;tar cvfp - $route ) | (cd "$rootdir"/DEBIAN ;tar xvfp -)
 
 		cd "$rootdir"/DEBIAN/
 		mv -f $postinst postinst >/dev/null 2>&1 || true
@@ -252,7 +252,7 @@ deb_pack(){
 		done
 		IFS=$SAVEIFS
 		mkdir -p "$rootdir"/var/jb
-		(cd /var/jb/ ; tar czf - --threads=0 --compress-program=xz -C / $route) | \(cd "$rootdir"/var/jb ; tar xzf - --decompress-program=xz --threads=0)
+		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$rootdir"/var/jb ;tar xvfp -)
 
 		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 			if [ -d "$rootdir"/var/jb ]; then
