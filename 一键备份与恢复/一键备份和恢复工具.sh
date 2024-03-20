@@ -129,9 +129,7 @@ deb_pack(){
   	fi
 	start_time=$(date +%s)
 	num=$(($num+1))
-	ver=`dpkg-query -s "$1" | grep Version | awk '{print $2}'`
-	arc=`dpkg-query -s "$1" | grep Architecture: | awk '{print $2}'`
- 	name=`dpkg-query -s "$1" | grep Name | awk '{print $2}'`
+	name=`dpkg-query -W --showformat='${Name}_${Version}_${Architecture}' $1`
     	echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
 	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
 		cp /var/lib/dpkg/info/"$1".list /var/lib/dpkg/info/"$1".list.debra
@@ -143,7 +141,7 @@ deb_pack(){
 		rm -f /var/lib/dpkg/info/"$1".list
 		mv -f /var/lib/dpkg/info/"$1".list.nonvar /var/lib/dpkg/info/"$1".list
 	fi
-	rootdir="$tweak_dir"/"$name"_"$ver"_"$arc"
+	rootdir="$tweak_dir"/"$name"
 	mkdir -p "$rootdir"/DEBIAN
 	dpkg-query -s "$1" | grep -v Status>>"$rootdir"/DEBIAN/control
 	if [ -d /var/jb/Library/dpkg/info ];then
@@ -275,7 +273,7 @@ tweak_backup(){
 		yes '' | sed 2q
 		pkgendnumber=`j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
 		printf  " ${nco}已安装的插件数量: %-24s\n" "$pkgendnumber"
-		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$i")";j=$[j+1];done
+		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}`dpkg-query -W --showformat='${Name}_${Version}_${Architecture}' $i`")";j=$[j+1];done
 		while true; do
 			echo -e "${nco} 请输入插件对应的序号 ${blu}[1-$pkgendnumber]${blu}${nco} 以空格分隔，按回车键结束输入:${nco} \c"
 			read pkgNums
