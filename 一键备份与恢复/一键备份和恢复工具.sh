@@ -124,157 +124,112 @@ dpkg_fill(){
 }
 
 deb_pack(){
-	thread_num=50
-	tempfifo=/var/tmp/$$.fifo
-	mkfifo $tempfifo
-	exec 5<>${tempfifo}
-	rm -rf ${tempfifo}
-	for((i=1;i<=$thread_num;i++))
-	do
-		echo ;
-	done >&5
-	
-	for pkg in $1; do
-	read -u5
-	{
-		ver=`dpkg-query -s "$pkg" | grep Version | awk '{print $2}'`
-		arc=`dpkg-query -s "$pkg" | grep Architecture: | awk '{print $2}'`
-  		name=`dpkg-query -s "$pkg" | grep Name | awk '{print $2}'`
-		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
-			cp /var/lib/dpkg/info/"$pkg".list /var/lib/dpkg/info/"$pkg".list.debra
-			cat /var/lib/dpkg/info/"$pkg".list | grep -v "/var" > /var/lib/dpkg/info/"$pkg".list.nonvar
-			sed -i -e 's#^#/var/jb#' /var/lib/dpkg/info/"$pkg".list.nonvar
-			cat /var/lib/dpkg/info/"$pkg".list | grep "/var" > /var/lib/dpkg/info/"$pkg".list.var
-			cat /var/lib/dpkg/info/"$pkg".list.var >> /var/lib/dpkg/info/"$pkg".list.nonvar
-			rm -f /var/lib/dpkg/info/"$pkg".list.var
-			rm -f /var/lib/dpkg/info/"$pkg".list
-			mv -f /var/lib/dpkg/info/"$pkg".list.nonvar /var/lib/dpkg/info/"$pkg".list
+	if [ -z "$total_time" ]; then
+    		total_time=0
+  	fi
+	start_time=$(date +%s)
+	num=$(($num+1))
+	ver=`dpkg-query -s "$1" | grep Version | awk '{print $2}'`
+	arc=`dpkg-query -s "$1" | grep Architecture: | awk '{print $2}'`
+ 	name=`dpkg-query -s "$1" | grep Name | awk '{print $2}'`
+    	echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
+	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
+		cp /var/lib/dpkg/info/"$1".list /var/lib/dpkg/info/"$1".list.debra
+		cat /var/lib/dpkg/info/"$1".list | grep -v "/var" > /var/lib/dpkg/info/"$1".list.nonvar
+		sed -i -e 's#^#/var/jb#' /var/lib/dpkg/info/"$1".list.nonvar
+		cat /var/lib/dpkg/info/"$1".list | grep "/var" > /var/lib/dpkg/info/"$1".list.var
+		cat /var/lib/dpkg/info/"$1".list.var >> /var/lib/dpkg/info/"$1".list.nonvar
+		rm -f /var/lib/dpkg/info/"$1".list.var
+		rm -f /var/lib/dpkg/info/"$1".list
+		mv -f /var/lib/dpkg/info/"$1".list.nonvar /var/lib/dpkg/info/"$1".list
+	fi
+	rootdir="$tweak_dir"/"$name"_"$ver"_"$arc"
+	mkdir -p "$rootdir"/DEBIAN
+	dpkg-query -s "$1" | grep -v Status>>"$rootdir"/DEBIAN/control
+	if [ -d /var/jb/Library/dpkg/info ];then
+		postinst=/var/jb/Library/dpkg/info/"$1".postinst
+		preinst=/var/jb/Library/dpkg/info/"$1".preinst
+		postrm=/var/jb/Library/dpkg/info/"$1".postrm
+		prerm=/var/jb/Library/dpkg/info/"$1".prerm
+		extrainst_=/var/jb/Library/dpkg/info/"$1".extrainst_
+		extrainst=/var/jb/Library/dpkg/info/"$1".extrainst
+		control=/var/jb/Library/dpkg/info/"$1".control-e
+		triggers=/var/jb/Library/dpkg/info/"$1".triggers
+		conffiles=/var/jb/Library/dpkg/info/"$1".conffiles
+		ldid=/var/jb/Library/dpkg/info/"$1".ldid
+		crash_reporter=/var/jb/Library/dpkg/info/"$1".crash_reporter
+	else
+		postinst=/var/lib/dpkg/info/"$1".postinst
+		preinst=/var/lib/dpkg/info/"$1".preinst
+		postrm=/var/lib/dpkg/info/"$1".postrm
+		prerm=/var/lib/dpkg/info/"$1".prerm
+		extrainst_=/var/lib/dpkg/info/"$1".extrainst_
+		extrainst=/var/lib/dpkg/info/"$1".extrainst
+		control=/var/lib/dpkg/info/"$1".control-e
+		triggers=/var/lib/dpkg/info/"$1".triggers
+		conffiles=/var/lib/dpkg/info/"$1".conffiles
+		ldid=/var/lib/dpkg/info/"$1".ldid
+		crash_reporter=/var/lib/dpkg/info/"$1".crash_reporter
+	fi
+	check_premissions "$postinst"
+	check_premissions "$preinst"
+	check_premissions "$postrm"
+	check_premissions "$prerm"
+	check_premissions "$extrainst_"
+	check_premissions "$extrainst"
+	check_premissions "$control"
+	check_premissions "$triggers"
+	check_premissions "$conffiles"
+	check_premissions "$ldid"
+	check_premissions "$crash_reporter"
+	cp "$postinst" "$rootdir"/DEBIAN/postinst 2> /dev/null
+	cp "$preinst" "$rootdir"/DEBIAN/preinst 2> /dev/null
+	cp "$postrm" "$rootdir"/DEBIAN/postrm 2> /dev/null
+	cp "$prerm" "$rootdir"/DEBIAN/prerm 2> /dev/null
+	cp "$extrainst_" "$rootdir"/DEBIAN/extrainst_ 2> /dev/null
+	cp "$extrainst" "$rootdir"/DEBIAN/extrainst 2> /dev/null
+	cp "$control" "$rootdir"/DEBIAN/control-e 2> /dev/null
+	cp "$triggers" "$rootdir"/DEBIAN/triggers 2> /dev/null
+	cp "$conffiles" "$rootdir"/DEBIAN/conffiles 2> /dev/null
+	cp "$ldid" "$rootdir"/DEBIAN/ldid 2> /dev/null
+	cp "$crash_reporter" "$rootdir"/DEBIAN/crash_reporter 2> /dev/null
+
+	SAVEIFS=$IFS
+	IFS=$'\n'
+	files=$(dpkg-query -L "$1"|sed "1 d")
+	for i in $files; do
+		if [ -d "$i" ]; then
+			mkdir -p "$rootdir"/"$i"
+		elif [ -f "$i" ]; then
+			cp -p "$i" "$rootdir"/"$i"
 		fi
-  		rootdir="$tweak_dir"/"$name"_"$ver"_"$arc"
-		mkdir -p "$rootdir"/DEBIAN
-		dpkg-query -s "$pkg" | grep -v Status>>"$rootdir"/DEBIAN/control
-		if [ -d /var/jb/Library/dpkg/info ];then
-			path=/var/jb/Library/dpkg/info/
-			postinst="$pkg".postinst
-	  		ret=`check_premissions $path $postinst`
-	  		route="${ret} ${route}"
-			preinst="$pkg".preinst
-	  		ret=`check_premissions $path $preinst`
-	  		route="${ret} ${route}"
-			postrm="$pkg".postrm
-	  		ret=`check_premissions $path $postrm`
-	  		route="${ret} ${route}"
-			prerm="$pkg".prerm
-	  		ret=`check_premissions $path $prerm`
-	  		route="${ret} ${route}"
-			extrainst_="$pkg".extrainst_
-	  		ret=`check_premissions $path $extrainst_`
-	  		route="${ret} ${route}"
-			extrainst="$pkg".extrainst
-	  		ret=`check_premissions $path $extrainst`
-	  		route="${ret} ${route}"
-			control="$pkg".control-e
-	  		ret=`check_premissions $path $control`
-	  		route="${ret} ${route}"
-			triggers="$pkg".triggers
-	  		ret=`check_premissions $path $triggers`
-	  		route="${ret} ${route}"
-			conffiles="$pkg".conffiles
-	  		ret=`check_premissions $path $conffiles`
-	  		route="${ret} ${route}"
-			ldid="$pkg".ldid
-	  		ret=`check_premissions $path $ldid`
-	  		route="${ret} ${route}"
-	  		crash_reporter="$pkg".crash_reporter
-	  		ret=`check_premissions $path $crash_reporter`
-	  		route="${ret} ${route}"
-		else
-			path=/var/lib/dpkg/info/
-			postinst="$pkg".postinst
-	  		ret=`check_premissions $path $postinst`
-	  		route="${ret} ${route}"
-			preinst="$pkg".preinst
-	  		ret=`check_premissions $path $preinst`
-	  		route="${ret} ${route}"
-			postrm="$pkg".postrm
-	  		ret=`check_premissions $path $postrm`
-	  		route="${ret} ${route}"
-			prerm="$pkg".prerm
-	  		ret=`check_premissions $path $prerm`
-	  		route="${ret} ${route}"
-			extrainst_="$pkg".extrainst_
-	  		ret=`check_premissions $path $extrainst_`
-	  		route="${ret} ${route}"
-			extrainst="$pkg".extrainst
-	  		ret=`check_premissions $path $extrainst`
-	  		route="${ret} ${route}"
-			control="$pkg".control-e
-	  		ret=`check_premissions $path $control`
-	  		route="${ret} ${route}"
-			triggers="$pkg".triggers
-	  		ret=`check_premissions $path $triggers`
-	  		route="${ret} ${route}"
-			conffiles="$pkg".conffiles
-	  		ret=`check_premissions $path $conffiles`
-	  		route="${ret} ${route}"
-			ldid="$pkg".ldid
-	  		ret=`check_premissions $path $ldid`
-	  		route="${ret} ${route}"
-	  		crash_reporter="$pkg".crash_reporter
-	  		ret=`check_premissions $path $crash_reporter`
-	  		route="${ret} ${route}"
-		fi
-		(cd $path ;tar cvfp - $route ) | (cd "$rootdir"/DEBIAN ;tar xvfp -)
-
-		cd "$rootdir"/DEBIAN/
-		mv -f $postinst postinst >/dev/null 2>&1 || true
-		mv -f $preinst preinst >/dev/null 2>&1 || true
-		mv -f $postrm postrm >/dev/null 2>&1 || true
-		mv -f $prerm prerm >/dev/null 2>&1 || true
-		mv -f $extrainst_ extrainst_ >/dev/null 2>&1 || true
-		mv -f $extrainst extrainst >/dev/null 2>&1 || true
-		mv -f $control control-e >/dev/null 2>&1 || true
-		mv -f $triggers triggers >/dev/null 2>&1 || true
-		mv -f $conffiles conffiles >/dev/null 2>&1 || true
-		mv -f $ldid ldid >/dev/null 2>&1 || true
-		mv -f $crash_reporter crash_reporter >/dev/null 2>&1 || true
-
-		SAVEIFS=$IFS
-		IFS=$'\n'
-		files=$(dpkg-query -L "$pkg"|sed "1 d")
-		route=""
-		for i in $files; do
-			if [ -f "$i" ]; then
-				i=`echo ${i##*jb}`
-				i=$(echo $i|sed 'y/ /*/')
-				route=".${i} ${route}"
-			fi
-		done
-		IFS=$SAVEIFS
-		mkdir -p "$rootdir"/var/jb
-		(cd /var/jb/ ;tar cvfp - $route ) | (cd "$rootdir"/var/jb ;tar xvfp -)
-
-		if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
-			if [ -d "$rootdir"/var/jb ]; then
-				mkdir -p "$rootdir"/temp
-				mv -f "$rootdir"/var/jb/.* "$rootdir"/var/jb/* "$rootdir"/temp >/dev/null 2>&1 || true
-				rm -rf "$rootdir"/var/jb
-				[ -d "$rootdir"/var ] && [ "$(ls -A "$rootdir"/var)" ] && : || rm -rf "$rootdir"/var
-				mv -f "$rootdir"/temp/.* "$rootdir"/temp/* "$rootdir" >/dev/null 2>&1 || true
-				rm -rf "$rootdir"/temp
-			fi
-			mv -f /var/lib/dpkg/info/"$pkg".list.debra /var/lib/dpkg/info/"$pkg".list
-		fi
-
-		echo
-		dpkg-deb -b "$rootdir" >/dev/null 2>&1
-		rm -rf "$rootdir" 2>&1
-		echo
-		echo "" >&5
-	} &
 	done
-	wait
-	exec 5>&-
+	IFS=$SAVEIFS
+
+	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
+		if [ -d "$rootdir"/var/jb ]; then
+			mkdir -p "$rootdir"/temp
+			mv -f "$rootdir"/var/jb/.* "$rootdir"/var/jb/* "$rootdir"/temp >/dev/null 2>&1 || true
+			rm -rf "$rootdir"/var/jb
+			[ -d "$rootdir"/var ] && [ "$(ls -A "$rootdir"/var)" ] && : || rm -rf "$rootdir"/var
+			mv -f "$rootdir"/temp/.* "$rootdir"/temp/* "$rootdir" >/dev/null 2>&1 || true
+			rm -rf "$rootdir"/temp
+		fi
+		mv -f /var/lib/dpkg/info/"$1".list.debra /var/lib/dpkg/info/"$1".list
+	fi
+
+	echo
+	dpkg-deb -b "$rootdir" >/dev/null 2>&1
+	rm -rf "$rootdir" 2>&1
+	total_time=$((total_time + $(date +%s) - start_time))
+	if [ $total_time -lt 60 ]; then
+		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
+	else
+		minutes=$((total_time/60))
+		seconds=$((total_time%60))
+		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒"
+	fi
+	echo
 }
 
 tweak_backup(){
