@@ -45,6 +45,7 @@ https://github.com/Ketty0725/Tweak_Backup/assets/103920238/73d24725-7625-40b9-88
 - 菠萝
 - 建哥
 
+![](http://profile-counter.glitch.me/evilbutcher/count.svg)
 
 <!-- links -->
 [your-project-path]:Ketty0725/Tweak_Backup
