@@ -439,10 +439,10 @@ recover(){
 	echo -e " [1] - ${nco}全部恢复${nco}"
 	echo -e " [2] - ${nco}仅恢复插件${nco}"
  	echo -e " [3] - ${nco}仅恢复配置及源地址${nco}"
-	echo -e " [4] - ${nco}退出${nco}"
+	echo -e " [q] - ${nco}退出${nco}"
 	echo
 	while true; do
-		echo -ne " (1/2/3/4): ${nco}"
+		echo -ne " (1/2/3/q): ${nco}"
 		read st
 		case $st in
 			[1] ) st=1;
@@ -451,14 +451,19 @@ recover(){
 			break;;
 			[3] ) st=3;
 			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 或 3 或 4！"${nco};
+   			[Qq] ) st=q;
+      			break;;
+			* ) echo -e ${red}" 请输入 1 或 2 或 3 或 q！"${nco};
 		esac
 	done
  	if [ $st = 1 ]; then
+  		clear
   		all_recover
     	elif [ $st = 2 ]; then
+     		clear
 		tweak_recover
 	elif [ $st = 3 ]; then
+ 		clear
 		setting_recover
 	else 
  		clear
