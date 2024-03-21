@@ -29,7 +29,7 @@ fi
 check_premissions(){
     if [ -e $1 ]; then
 		f_p=`stat -c %a $1`
-		if [ $f_p != '555' ] && [ $f_p != '755' ] && [ $f_p != '775' ] && [ $f_p != '777' ]; then
+		if [[ $f_p -ne 555 ]] && [[ $f_p -ne 755 ]] && [[ $f_p -ne 775 ]] && [[ $f_p -ne 777 ]]; then
 			chmod 755 $1
 		fi
     fi
@@ -492,7 +492,7 @@ recover(){
 	if [ $st = 1 ]; then
 		echo
 		bakendnumber=`j=1;for i in $(ls -l /var/mobile/Documents/tweak_tool/ | grep -E "(Xina)|(Dopamine)|(\s)备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e $j: $i;j=$[j+1];done|tail -1|awk -F ": " '{print $1}'`
-		if [ $bakendnumber > 0 ]; then
+		if [[ $bakendnumber -gt 0 ]]; then
 			echo -e "${nco} 请选择需要恢复的备份！${nco}"
 			echo
 			j=1;for i in $(ls -l /var/mobile/Documents/tweak_tool/ | grep -E "(Xina)|(Dopamine)|(\s)备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$i")";j=$[j+1];done
