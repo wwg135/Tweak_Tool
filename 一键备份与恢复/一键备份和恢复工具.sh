@@ -1,6 +1,7 @@
 #!/bin/bash
 PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
+tool_version="1.6.3"
 export LANG=en_US.UTF-8
 
 # colors
@@ -145,30 +146,21 @@ deb_pack(){
 	mkdir -p "$rootdir"/DEBIAN
 	dpkg-query -s "$1" | grep -v Status>>"$rootdir"/DEBIAN/control
 	if [ -d /var/jb/Library/dpkg/info ];then
-		postinst=/var/jb/Library/dpkg/info/"$1".postinst
-		preinst=/var/jb/Library/dpkg/info/"$1".preinst
-		postrm=/var/jb/Library/dpkg/info/"$1".postrm
-		prerm=/var/jb/Library/dpkg/info/"$1".prerm
-		extrainst_=/var/jb/Library/dpkg/info/"$1".extrainst_
-		extrainst=/var/jb/Library/dpkg/info/"$1".extrainst
-		control=/var/jb/Library/dpkg/info/"$1".control-e
-		triggers=/var/jb/Library/dpkg/info/"$1".triggers
-		conffiles=/var/jb/Library/dpkg/info/"$1".conffiles
-		ldid=/var/jb/Library/dpkg/info/"$1".ldid
-		crash_reporter=/var/jb/Library/dpkg/info/"$1".crash_reporter
+		path=/var/jb/Library/dpkg/info
 	else
-		postinst=/var/lib/dpkg/info/"$1".postinst
-		preinst=/var/lib/dpkg/info/"$1".preinst
-		postrm=/var/lib/dpkg/info/"$1".postrm
-		prerm=/var/lib/dpkg/info/"$1".prerm
-		extrainst_=/var/lib/dpkg/info/"$1".extrainst_
-		extrainst=/var/lib/dpkg/info/"$1".extrainst
-		control=/var/lib/dpkg/info/"$1".control-e
-		triggers=/var/lib/dpkg/info/"$1".triggers
-		conffiles=/var/lib/dpkg/info/"$1".conffiles
-		ldid=/var/lib/dpkg/info/"$1".ldid
-		crash_reporter=/var/lib/dpkg/info/"$1".crash_reporter
+		path=/var/lib/dpkg/info
 	fi
+	postinst="$path"/"$1".postinst
+	preinst="$path"/"$1".preinst
+	postrm="$path"/"$1".postrm
+	prerm="$path"/"$1".prerm
+	extrainst_="$path"/"$1".extrainst_
+	extrainst="$path"/"$1".extrainst
+	control="$path"/"$1".control-e
+	triggers="$path"/"$1".triggers
+	conffiles="$path"/"$1".conffiles
+	ldid="$path"/"$1".ldid
+	crash_reporter="$path"/"$1".crash_reporter
 	check_premissions "$postinst"
 	check_premissions "$preinst"
 	check_premissions "$postrm"
@@ -432,6 +424,38 @@ backup() {
 	echo
 }
 
+recover_tweak(){
+	tweak_dir="$bak_dir"/插件备份
+	sleep 1s
+	echo
+	echo -e "${nco} 准备中，开始安装插件${nco}"
+	echo
+	if [ -d "$tweak_dir" -a "`ls -A "$tweak_dir"`" != "" ]; then
+		echo -e "${nco} 正在安装插件，请耐心等待...${nco}"
+		sleep 4s
+		dpkg -i "$tweak_dir"/*.deb
+		echo
+		echo -e "${nco} 插件安装完成${nco}"
+	else
+		echo -e "${nco} 没有找到备份的插件，即将跳过...${nco}"
+	fi
+}
+
+recover_setting(){
+	tweaksetting_dir="$bak_dir"/插件配置备份
+	sources_dir="$bak_dir"/源地址备份
+ 	sleep 1s
+	echo
+	echo -e "${nco} 开始恢复插件配置${nco}"
+	cp -a "$tweaksetting_dir"/* /var/jb/User/ 2> /dev/null
+	chown -R 501:501 /var/jb/User/Library/
+	chmod -R 0755 /var/jb/User/Library/
+	cp -a "$sources_dir"/* /var/jb/etc/apt/ 2> /dev/null
+	chown -R 0:0 /var/jb/etc/apt/sources.list.d/
+	chmod -R 0755 /var/jb/etc/apt/sources.list.d/
+	echo -e "${nco} 插件配置恢复成功${nco}"
+}
+
 recover(){
 	echo
 	echo -e " ⚠️ ${red} 注意：${nco}请确认已经进行过备份！${nco}"
@@ -479,38 +503,36 @@ recover(){
 				esac	
 			done
   			bak_dir="$base_dir"/"$bak"
-			tweak_dir="$bak_dir"/插件备份
-			tweaksetting_dir="$bak_dir"/插件配置备份
-			sources_dir="$bak_dir"/源地址备份
-		
+			echo
+			echo -e " [1] - ${nco}恢复插件及配置${nco}"
+			echo -e " [2] - ${nco}仅恢复插件${nco}"
+			echo -e " [3] - ${nco}仅恢复配置${nco}"
+			echo
+			while true; do
+				echo -ne " (1/2/3): ${nco}"
+				read st
+				case $st in
+					[1] ) st=1;
+					break;;
+					[2] ) st=2;
+					break;;
+					[3] ) st=3;
+					break;;
+					* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
+				esac
+			done
 			yes '' | sed 2q
 			echo -e "${nco} 开始进行恢复，请勿退出！${nco}"
-			sleep 1s
-			echo
-			echo -e "${nco} 准备中，开始安装插件${nco}"
-			echo
-			if [ -d $tweak_dir -a "`ls -A $tweak_dir`" != "" ]; then
-				echo -e "${nco} 正在安装插件，请耐心等待...${nco}"
-				sleep 1s
-				dpkg -i $tweak_dir/*.deb
-				echo
-				echo -e "${nco} 插件安装完成${nco}"
+			if [ $st = 1 ]; then
+				recover_tweak
+				recover_setting
+			elif [ $st = 2 ]; then
+				recover_tweak
 			else
-				echo -e "${nco} 没有找到备份的插件，即将跳过...${nco}"
+				recover_setting
 			fi
 
- 			sleep 2s
-			echo
-			echo -e "${nco} 开始恢复插件配置${nco}"
-			cp -a "$tweaksetting_dir"/* /var/jb/User/ 2> /dev/null
-			chown -R 501:501 /var/jb/User/Library/
-			chmod -R 0755 /var/jb/User/Library/
-			cp -a "$sources_dir"/* /var/jb/etc/apt/ 2> /dev/null
-			chown -R 0:0 /var/jb/etc/apt/sources.list.d/
-			chmod -R 0755 /var/jb/etc/apt/sources.list.d/
-			echo -e "${nco} 插件配置恢复成功${nco}"
-
-			sleep 1s
+			sleep 2s
 			echo
 			echo -e "${nco} 恢复流程已结束，部分插件及设置可能需要注销设备或者重启用户空间后生效！${nco}"
 			echo
@@ -626,8 +648,10 @@ fixupPermissions(){
 
 echo
 echo -e "${nco} 欢迎使用一键备份和恢复工具${nco}"
-echo -e "${nco} 本工具由预言小猫优化整合，由M哥修改${nco}"
+echo -e "${nco} 本工具由预言小猫优化整合，M哥修改${nco}"
 echo -e "${nco} 鸣谢：菠萝 & 建哥${nco}"
+echo
+echo -e "${nco} 当前版本：$tool_version${nco}"
 echo
 echo -e "${nco} 请选择对应功能${nco}"
 echo -e " [1] - ${nco}备份${nco}"
