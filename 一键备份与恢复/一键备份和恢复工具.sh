@@ -221,7 +221,7 @@ tweak_backup(){
 	rm -rf ${tempfifo}
  	for((i=1;i<=$thread_num;i++))
 	do
-		echo >&-
+		echo ;
 	done >&5
  
 	if [ $st = 3 ]; then
