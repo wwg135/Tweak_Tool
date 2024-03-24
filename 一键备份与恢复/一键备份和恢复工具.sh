@@ -219,6 +219,10 @@ tweak_backup(){
 	mkfifo $tempfifo
 	exec 5<>${tempfifo}
 	rm -rf ${tempfifo}
+ 	for((i=1;i<=$thread_num;i++))
+	do
+		echo >&-
+	done >&5
  
 	if [ $st = 3 ]; then
 		clear
