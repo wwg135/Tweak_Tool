@@ -255,11 +255,7 @@ tweak_backup(){
 			esac
 		done
 		echo
-		num=0
-		for i in ${debs[@]}; do
-			num=$((num+1))
-		done
-  		echo -e "${nco} 正在备份 ${red}"$num" ${nco}个插件，请耐心等待...${nco}"
+		echo -e "${nco} 开始备份...${nco}";
 		echo
 		for pkg in ${debs[@]}
 		do
