@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tool_version="1.6.3"
+tool_version="1.6.4"
 export LANG=en_US.UTF-8
 
 # colors
@@ -509,7 +509,7 @@ recover(){
 						echo -e ${red}" 备份序号必须在 [1-$bakendnumber] 之间！"${nco}
 						continue
 					else
-						bak=`j=1;for i in $(ls -l /var/mobile/Documents/tweak_tool/ | grep -E "(Xina)|(Dopamine)|(\s)备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo $j: $i;j=$[j+1];done | grep -e "$bakNum:" | head -1 |awk -F ": " '{print $2}'`
+						bak=`j=1;for i in $(ls -l /var/mobile/Documents/tweak_tool/ | grep -E "(Xina)|(Dopamine)|(\s)备份_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}" |awk '/^d/ {print $NF}');do echo $j: $i;j=$[j+1];done | grep -e "$bakNum: " | head -1 |awk -F ": " '{print $2}'`
 					fi
 					break
 					;;
