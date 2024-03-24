@@ -224,7 +224,7 @@ tweak_backup(){
 		echo ;
 	done >&5
  
-	if [ $st = 3 ]; then
+	if [ $st = 2 ]; then
 		clear
 		yes '' | sed 1q
 		pkgendnumber=`j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
