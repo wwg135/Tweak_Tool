@@ -1,7 +1,7 @@
 #!/bin/bash
 PATH=/var/jb/bin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/usr/sbin:$PATH
 
-tool_version="1.6.4"
+tool_version="2.0.0-beta"
 export LANG=en_US.UTF-8
 
 # colors
@@ -22,18 +22,21 @@ if [[ $EUID -ne 0 ]]; then
 	echo
 	echo -e ${red}" 权限不足！"
 	echo
-	echo -e ${red}" 如使用Terminal，请用sudo TweakTool命令执行"
+	echo -e ${red}" 如使用Terminal，请用sudo tweaktool命令执行"
 	echo
 	exit
 fi
 
-check_premissions(){
-    if [ -e $1 ]; then
-		f_p=`stat -c %a $1`
+checkPremissions(){
+	f=$1/$2
+	if [ -e $f ]; then
+		f_p=`stat -c %a $f`
 		if [[ $f_p -ne 555 ]] && [[ $f_p -ne 755 ]] && [[ $f_p -ne 775 ]] && [[ $f_p -ne 777 ]]; then
-			chmod 755 $1
+			chmod 755 $f
 		fi
-    fi
+		echo $2
+	fi
+	echo ""
 }
 
 check_dpkg_run(){
@@ -129,118 +132,69 @@ deb_pack(){
     		total_time=0
   	fi
 	start_time=$(date +%s)
-	num=$(($num+1))
-	name=`dpkg-query -W --showformat='${Name}_${Version}_${Architecture}' $1`
-    	echo -e "${nco} 正在备份第"$num"个插件：${red}"$name"${nco}，请耐心等待...${nco}"
-	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
-		cp /var/lib/dpkg/info/"$1".list /var/lib/dpkg/info/"$1".list.debra
-		cat /var/lib/dpkg/info/"$1".list | grep -v "/var" > /var/lib/dpkg/info/"$1".list.nonvar
-		sed -i -e 's#^#/var/jb#' /var/lib/dpkg/info/"$1".list.nonvar
-		cat /var/lib/dpkg/info/"$1".list | grep "/var" > /var/lib/dpkg/info/"$1".list.var
-		cat /var/lib/dpkg/info/"$1".list.var >> /var/lib/dpkg/info/"$1".list.nonvar
-		rm -f /var/lib/dpkg/info/"$1".list.var
-		rm -f /var/lib/dpkg/info/"$1".list
-		mv -f /var/lib/dpkg/info/"$1".list.nonvar /var/lib/dpkg/info/"$1".list
-	fi
+	name=$([ ! -z "`dpkg-query -W -f='${Name}' $1`" ] && echo "`dpkg-query -W -f='${Name}_${Version}_${Architecture}' $1`" || echo "`dpkg-query -W -f='${Package}_${Version}_${Architecture}' $1`")
 	rootdir="$tweak_dir"/"$name"
 	mkdir -p "$rootdir"/DEBIAN
 	dpkg-query -s "$1" | grep -v Status>>"$rootdir"/DEBIAN/control
+ 	route=""
 	if [ -d /var/jb/Library/dpkg/info ];then
 		path=/var/jb/Library/dpkg/info
 	else
 		path=/var/lib/dpkg/info
 	fi
-	postinst="$path"/"$1".postinst
-	preinst="$path"/"$1".preinst
-	postrm="$path"/"$1".postrm
-	prerm="$path"/"$1".prerm
-	extrainst_="$path"/"$1".extrainst_
-	extrainst="$path"/"$1".extrainst
-	control="$path"/"$1".control-e
-	triggers="$path"/"$1".triggers
-	conffiles="$path"/"$1".conffiles
-	ldid="$path"/"$1".ldid
-	crash_reporter="$path"/"$1".crash_reporter
-	check_premissions "$postinst"
-	check_premissions "$preinst"
-	check_premissions "$postrm"
-	check_premissions "$prerm"
-	check_premissions "$extrainst_"
-	check_premissions "$extrainst"
-	check_premissions "$control"
-	check_premissions "$triggers"
-	check_premissions "$conffiles"
-	check_premissions "$ldid"
-	check_premissions "$crash_reporter"
-	cp "$postinst" "$rootdir"/DEBIAN/postinst 2> /dev/null
-	cp "$preinst" "$rootdir"/DEBIAN/preinst 2> /dev/null
-	cp "$postrm" "$rootdir"/DEBIAN/postrm 2> /dev/null
-	cp "$prerm" "$rootdir"/DEBIAN/prerm 2> /dev/null
-	cp "$extrainst_" "$rootdir"/DEBIAN/extrainst_ 2> /dev/null
-	cp "$extrainst" "$rootdir"/DEBIAN/extrainst 2> /dev/null
-	cp "$control" "$rootdir"/DEBIAN/control-e 2> /dev/null
-	cp "$triggers" "$rootdir"/DEBIAN/triggers 2> /dev/null
-	cp "$conffiles" "$rootdir"/DEBIAN/conffiles 2> /dev/null
-	cp "$ldid" "$rootdir"/DEBIAN/ldid 2> /dev/null
-	cp "$crash_reporter" "$rootdir"/DEBIAN/crash_reporter 2> /dev/null
+	debian_list=`dpkg-query --control-list $1`
+	for i in $debian_list; do
+		if [[ "$i" != "md5sums" ]]; then
+			ret=`checkPremissions $path "$1"."$i"`
+			route="${ret} ${route}"
+		fi
+	done
+	if [ ! -z `echo $route | sed 's/ //g'` ]; then
+		(cd $path ;tar cf - $route ) | (cd "$rootdir"/DEBIAN ;tar xf -)
+	fi
+	for i in $debian_list; do
+		if [[ "$i" != "md5sums" ]]; then
+			mv -f "$rootdir"/DEBIAN/"$1"."$i" "$rootdir"/DEBIAN/"$i"
+		fi
+	done
 
 	SAVEIFS=$IFS
 	IFS=$'\n'
 	files=$(dpkg-query -L "$1"|sed "1 d")
+	route=""
 	for i in $files; do
-		if [ -d "$i" ]; then
-			mkdir -p "$rootdir"/"$i"
-		elif [ -f "$i" ]; then
-			cp -p "$i" "$rootdir"/"$i"
+		if [ -f "$i" ]; then
+			i="."$(echo $i|sed 'y/ /*/')
+			route="${i} ${route}"
 		fi
 	done
 	IFS=$SAVEIFS
-
-	if [ -d /var/jb/xina ] && [ ! -f /var/jb/.installed_xina15 ]; then
-		if [ -d "$rootdir"/var/jb ]; then
-			mkdir -p "$rootdir"/temp
-			mv -f "$rootdir"/var/jb/.* "$rootdir"/var/jb/* "$rootdir"/temp >/dev/null 2>&1 || true
-			rm -rf "$rootdir"/var/jb
-			[ -d "$rootdir"/var ] && [ "$(ls -A "$rootdir"/var)" ] && : || rm -rf "$rootdir"/var
-			mv -f "$rootdir"/temp/.* "$rootdir"/temp/* "$rootdir" >/dev/null 2>&1 || true
-			rm -rf "$rootdir"/temp
-		fi
-		mv -f /var/lib/dpkg/info/"$1".list.debra /var/lib/dpkg/info/"$1".list
+	if [ ! -z `echo $route | sed 's/ //g'` ]; then
+		(cd / ;tar cf - $route ) | (cd "$rootdir" ;tar xf -)
 	fi
 
 	echo
 	dpkg-deb -b "$rootdir" >/dev/null 2>&1
 	rm -rf "$rootdir" 2>&1
-	total_time=$((total_time + $(date +%s) - start_time))
-	if [ $total_time -lt 60 ]; then
-		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$total_time" ${nco}秒"
-	else
-		minutes=$((total_time/60))
-		seconds=$((total_time%60))
-		echo -e "已成功备份 ${red}"$num"${nco} 个插件，耗时：${red}"$minutes" ${nco}分 ${red}${seconds} ${nco}秒"
-	fi
-	echo
+	unset route
 }
 
 tweak_backup(){
 	yes '' | sed 2q
 	echo -e "${nco} 开始进行插件备份！${nco}"
 	echo
-	echo -e " [1] - ${nco}备份所有插件和依赖${nco}"
-	echo -e " [2] - ${nco}备份所有插件(过滤系统依赖)${nco}"
-	echo -e " [3] - ${nco}选择性备份插件${nco}"
+	echo -e " [1] - ${nco}备份所有插件${nco}"
+	echo -e " [2] - ${nco}选择性备份插件${nco}"
 	echo
 	while true; do
-		echo -ne " (1/2/3): ${nco}"
+		echo -ne " (1/2): ${nco}"
 		read st
 		case $st in
 			[1] ) st=1;
 			break;;
 			[2] ) st=2;
 			break;;
-			[3] ) st=3;
-			break;;
-			* ) echo -e ${red}" 请输入 1 或 2 或 3 ！"${nco};
+			* ) echo -e ${red}" 请输入 1 或 2 ！"${nco};
 		esac
 	done
  	if [ -f /var/jb/.installed_dopamine ]; then
@@ -259,13 +213,23 @@ tweak_backup(){
 	mkd $tweaksetting_dir
 	mkd $sources_dir
 	chown -R 501:501 $bak_dir 2> /dev/null
+
+ 	thread_num=10
+	tempfifo=$base_dir/$$.fifo
+	mkfifo $tempfifo
+	exec 5<>${tempfifo}
+	rm -rf ${tempfifo}
+	for((i=1;i<=$thread_num;i++))
+	do
+		echo ;
+	done >&5
  
 	if [ $st = 3 ]; then
 		clear
-		yes '' | sed 2q
+		yes '' | sed 1q
 		pkgendnumber=`j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e $j:$i;j=$[j+1];done|tail -1|awk -F ":" '{print $1}'`
-		printf  " ${nco}已安装的插件数量: %-24s\n" "$pkgendnumber"
-		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}`dpkg-query -W --showformat='${Name}' $i`\n ${nco}`dpkg-query -W --showformat='${Version} ▏${Architecture}' $i`\n ${nco}$i")";j=$[j+1];done
+		printf " ${nco}已安装的插件数量: %-24s\n" "$pkgendnumber"
+		j=1;for i in $(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | awk '{print $1}');do name=$([ ! -z "`dpkg-query -W -f='${Name}' $i`" ] && echo "`dpkg-query -W -f='${Name}_${Version}_${Architecture}' $i`" || echo "`dpkg-query -W -f='${Package}_${Version}_${Architecture}' $i`");echo -e "$(printf " ${nco}%-59s${nco}" "${blu}$j${nco}: ${nco}$name")";j=$[j+1];done
 		while true; do
 			echo -e "${nco} 请输入插件对应的序号 ${blu}[1-$pkgendnumber]${blu}${nco} 以空格分隔，按回车键结束输入:${nco} \c"
 			read pkgNums
@@ -293,22 +257,34 @@ tweak_backup(){
 		echo;
 		echo -e "${nco} 开始备份...${nco}";
 		echo;
-		for pkg in ${debs[@]}; do
-			deb_pack $pkg
+		for pkg in $debs
+		do
+		{
+			read -u5
+			{
+				deb_pack $pkg
+				echo "" >&5
+			} &
+		}
 		done
 	else
-		if [ $st = 1 ]; then
-			debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | cut -f1 | awk '{print $1}')"
-		elif [ $st = 2 ]; then
-			debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
-		fi
+		debs="$(dpkg --get-selections | grep -v -E 'deinstall|gsc\.|cy\+|swift-|build-|llvm|clang' | grep -vw 'git' | grep -vwFf /var/jb/usr/local/lib/tweak_exclude_list | cut -f1 | awk '{print $1}')"
 		echo;
 		echo -e "${nco} 开始备份...${nco}";
 		echo;
-		for pkg in $debs; do
-			deb_pack $pkg
+		for pkg in $debs
+		do
+		{
+			read -u5
+			{
+				deb_pack $pkg
+				echo "" >&5
+			} &
+		}
 		done
 	fi
+	wait
+	exec 5>&-
 
 	clear
 	unset pkg
@@ -420,7 +396,8 @@ backup() {
 		echo -e "${nco} 备份流程已结束，耗时：${red}$total_time_total ${nco}秒，感谢耐心等待！${nco}"
 	fi
  	echo
-	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+	echo -e "${nco} 备份流程已结束，感谢耐心等待！${nco}"
+	echo -e "${nco} 现在可以退出终端${nco}"
 	echo
 }
 
@@ -562,7 +539,7 @@ recover(){
 			else
 				clear
 				yes '' | sed 2q
-				echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+				echo -e "${nco} 现在可以退出终端${nco}"
 				echo
 				exit
 			fi
@@ -576,7 +553,7 @@ recover(){
 		clear
 		yes '' | sed 2q
 		echo -e "${nco} 已取消恢复！${nco}"
-		echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+		echo -e "${nco} 现在可以退出终端${nco}"
 		echo
 		exit
 	fi
@@ -687,7 +664,7 @@ elif [ $st = 3 ]; then
 else
 	clear
 	yes '' | sed 2q
-	echo -e "${nco} 点击左上角 \"完成\" 退出终端${nco}"
+	echo -e "${nco} 现在可以退出终端${nco}"
 	echo
 	exit
 fi
