@@ -260,8 +260,12 @@ tweak_backup(){
 			num=$((num+1))
 		done
   		for ((i=3; i>=1; i--)); do
-    			echo -e "\r${nco}即将备份 ${blu}$num ${nco}个插件，${red}$i ${nco}秒后开始备份...\c"
-    			sleep 1
+    		if [ $i -eq 1 ]; then
+        		echo -e "\r${nco}开始备份...\c"
+    		else
+        		echo -e "\r${nco}即将备份 ${blu}$num ${nco}个插件，${red}$i ${nco}秒后开始备份...\c"
+    		fi
+    		sleep 1
 		done
 		echo
 		for pkg in ${debs[@]}
@@ -282,8 +286,12 @@ tweak_backup(){
     			num=$((num+1))
 		done
 		for ((i=3; i>=1; i--)); do
-    			echo -e "\r${nco}即将备份 ${blu}$num ${nco}个插件，${red}$i ${nco}秒后开始备份...\c"
-    			sleep 1
+    		if [ $i -eq 1 ]; then
+        		echo -e "\r${nco}开始备份...\c"
+    		else
+        		echo -e "\r${nco}即将备份 ${blu}$num ${nco}个插件，${red}$i ${nco}秒后开始备份...\c"
+    		fi
+    		sleep 1
 		done
 		echo
 		for pkg in $debs
