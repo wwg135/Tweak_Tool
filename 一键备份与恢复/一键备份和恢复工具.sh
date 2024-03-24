@@ -174,7 +174,7 @@ deb_pack(){
 	fi
 
 	echo
-	dpkg-deb -b "$rootdir" >/dev/null 2>&1
+	dpkg-deb -b "$rootdir" 2>&1
 	rm -rf "$rootdir" 2>&1
 	unset route
 }
