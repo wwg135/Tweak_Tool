@@ -259,7 +259,7 @@ tweak_backup(){
 		for i in $debs; do
 			num=$((num+1))
 		done
-  		echo -e "${nco} 正在备份"$num"个插件，请耐心等待...${nco}"
+  		echo -e "${nco} 正在备份 ${red}"$num" ${nco}个插件，请耐心等待...${nco}"
 		echo
 		for pkg in $debs
 		do
@@ -267,6 +267,7 @@ tweak_backup(){
 			read -u5
 			{
 				deb_pack $pkg
+    				echo "" >&5
 			} &
 		}
 		done
@@ -277,7 +278,7 @@ tweak_backup(){
 		for i in $debs; do
 			num=$((num+1))
 		done
-  		echo -e "${nco} 正在备份"$num"个插件，请耐心等待...${nco}"
+  		echo -e "${nco} 正在备份 ${red}"$num" ${nco}个插件，请耐心等待...${nco}"
 		echo
 		for pkg in $debs
 		do
@@ -285,6 +286,7 @@ tweak_backup(){
 			read -u5
 			{
 				deb_pack $pkg
+    				echo "" >&5
 			} &
 		}
 		done
