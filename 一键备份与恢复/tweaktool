@@ -380,8 +380,8 @@ backup() {
 			bak_dir="$base_dir"/"$jailbreak""备份_""$current_time"
 			tweaksetting_dir="$bak_dir"/插件配置备份
 			sources_dir="$bak_dir"/源地址备份
-			rm $tweaksetting_dir
-			rm $sources_dir
+			rm -r $tweaksetting_dir
+			rm -r $sources_dir
 		fi
 		clear
 		yes '' | sed 2q
