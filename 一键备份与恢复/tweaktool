@@ -11,6 +11,7 @@ nco="\033[0m" #no color
 num=0
 
 base_dir=/var/mobile
+current_time=$(date "+%Y-%m-%d_%H:%M:%S")
 
 mkd(){
     if [ ! -e $1 ]; then
@@ -200,10 +201,13 @@ tweak_backup(){
 	else
 		jailbreak=""
 	fi
-	current_time=$(date "+%Y-%m-%d_%H:%M:%S")
 	bak_dir="$base_dir"/"$jailbreak""备份_""$current_time"
 	tweak_dir="$bak_dir"/插件备份
+	tweaksetting_dir="$bak_dir"/插件配置备份
+	sources_dir="$bak_dir"/源地址备份
 	mkd $tweak_dir
+	mkd $tweaksetting_dir
+	mkd $sources_dir
 	chown -R 501:501 $bak_dir 2> /dev/null
 
  	thread_num=10
@@ -363,7 +367,6 @@ backup() {
 			else
 				jailbreak=""
 			fi
-			current_time=$(date "+%Y-%m-%d_%H:%M:%S")
 			bak_dir="$base_dir"/"$jailbreak""备份_""$current_time"
 			tweaksetting_dir="$bak_dir"/插件配置备份
 			sources_dir="$bak_dir"/源地址备份
@@ -373,6 +376,13 @@ backup() {
 		fi
 		setting_backup
 	else
+		if [ -n $bak_dir ]; then
+			bak_dir="$base_dir"/"$jailbreak""备份_""$current_time"
+			tweaksetting_dir="$bak_dir"/插件配置备份
+			sources_dir="$bak_dir"/源地址备份
+			rm $tweaksetting_dir
+			rm $sources_dir
+		fi
 		clear
 		yes '' | sed 2q
 		echo -e "${nco} 已跳过配置备份！${nco}"
