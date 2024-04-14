@@ -128,10 +128,6 @@ dpkg_fill(){
 }
 
 deb_pack(){
-	if [ -z "$total_time" ]; then
-    		total_time=0
-  	fi
-	start_time=$(date +%s)
 	name=$([ ! -z "`dpkg-query -W -f='${Name}' $1`" ] && echo "`dpkg-query -W -f='${Name}_${Version}_${Architecture}' $1`" || echo "`dpkg-query -W -f='${Package}_${Version}_${Architecture}' $1`")
 	rootdir="$tweak_dir"/"$name"
 	mkdir -p "$rootdir"/DEBIAN
@@ -260,7 +256,7 @@ tweak_backup(){
 			num=$((num+1))
 		done
   		for ((i=3; i>=1; i--)); do
-    			echo -e "\r${nco}即将备份 ${blu}$num ${nco}个插件，${red}$i ${nco}秒后开始备份...\c"
+    			echo -e "${nco}即将开始备份 ${blu}$num ${nco}个插件..."
     			sleep 1
 		done
 		echo
@@ -316,7 +312,6 @@ setting_backup(){
 }
 
 backup() {
-	start_time=$(date +%s)
 	echo
 	echo -e "${nco} 根据数据大小，备份可能需要5-10分钟甚至更久，请预留充足时间...${nco}"
 	echo -e "${nco} 开始备份后请耐心等待，保持界面不要退出！${nco}"
@@ -339,11 +334,8 @@ backup() {
 	if [ $st = 1 ]; then
 		yes '' | sed 2q
 		echo -e "${nco} 开始检查包完整性！${nco}"
-		start_time_plugins=$(date +%s)
 		echo
 		dpkg_fill
-		end_time_plugins=$(date +%s)
-		plugins_time=$((end_time_plugins-start_time_plugins))
 	else
 		clear
 		yes '' | sed 2q
@@ -396,16 +388,6 @@ backup() {
 		echo
 	fi
 
-	end_time=$(date +%s)
-	total_time_initial=$((end_time-start_time))
-	total_time_total=$((total_time_initial + plugins_time + settings_time))
-	if ((total_time_total >= 60)); then
-		minutes=$((total_time_total / 60))
-		seconds=$((total_time_total % 60))
-		echo -e "${nco} 备份流程已结束，耗时：${red}$minutes ${nco}分 ${red}$seconds ${nco}秒，感谢耐心等待！${nco}"
-	else
-		echo -e "${nco} 备份流程已结束，耗时：${red}$total_time_total ${nco}秒，感谢耐心等待！${nco}"
-	fi
  	echo
 	echo -e "${nco} 备份流程已结束，感谢耐心等待！${nco}"
 	echo -e "${nco} 现在可以退出终端${nco}"
